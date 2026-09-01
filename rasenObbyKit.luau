@@ -225,7 +225,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
                 OrbitalOrigin = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "Part" or "Vector3",
                 OrbitalOffset = "number",
                 Optional = {
-                    OrbitalFaceCenter = "boolean"
+                    OrbitalFaceCenter = "boolean",
                     XTilt = "number",
                     YRotation = "number",
                     ZAxis = "number",
