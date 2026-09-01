@@ -222,24 +222,40 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
                 }
             },
             Orbital = {
-                OrbitalOrigin = "Part",
+                OrbitalOrigin = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "Part" or "Vector3",
                 OrbitalOffset = "number",
                 Optional = {
                     OrbitalFaceCenter = "boolean"
-                    XTilt = 20,
-                    YRotation = 23,
-                    ZAxis = 390,
-                    Speed = 500,
+                    XTilt = "number",
+                    YRotation = "number",
+                    ZAxis = "number",
+                    Speed = "number",
                 },
             },
             Mover = {
-
+                TargetPosition = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "Part" or "Vector3",
+                Optional = {
+                    LoopDelay = "number",
+                    TweenInfo = "table"
+                }
             },
             Conveyor = {
-
+                Optional = {
+                    XAxis = "number",
+                    YAxis = "number",
+                    ZAxis = "number",
+                    BasedOnRotation = "Boolean",
+                },
+                Dependencies = {
+                    BasedOnRotation = {
+                        BaseSpeed = "number"
+                    }
+                }
             },
             Standable = {
-
+                FunctionCheck = function(BasePart)
+                    return BasePart.ClassName == "Part" 
+                end
             }
         }
 
