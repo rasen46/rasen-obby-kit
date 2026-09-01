@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.2.0 dev build
+version 0.2.0 beta release
 
 please dont strip credits from this
 ]]
@@ -50,9 +50,12 @@ local SCLI_CONFIGS = {
 			--[[
            Example Spinner
            [Workspace.ExampleSpinner] = { -- set the part you want to spin to the name of the part (this example shows a part named 'ExampleSpinner')
-               XAxis = 500, -- sets how fast it rotates on the X Axis (optional, default 0)
-               YAxis = 20,  -- sets how fast it rotates on the Y Axis (optional, default 0)
-               ZAxis = 390, -- sets how fast it rotates on the Z Axis (optional, default 0)
+               XAxis = 500,     -- sets how fast it rotates on the X Axis (optional, default 0)
+               YAxis = 20,      -- sets how fast it rotates on the Y Axis (optional, default 0)
+               ZAxis = 390,     -- sets how fast it rotates on the Z Axis (optional, default 0)
+			   AngleXOffset = 0,-- sets how offsetted the X Axis from 0 degrees (optional, default 0)
+			   AngleYOffset = 0,-- sets how offsetted the Y Axis from 0 degrees (optional, default 0)
+			   AngleZOffset = 0,-- sets how offsetted the Z Axis from 0 degrees (optional, default 0)
            }
            ]]
 		},
@@ -60,10 +63,13 @@ local SCLI_CONFIGS = {
 			--[[
            Example Orbital
            [Workspace.ExampleOrbital] = { -- set the part you want to orbit around smth to the name of the part (this example shows a part named 'ExampleOrbital')
-               Speed = 500,    -- sets how fast it orbits the origin in degrees/second (optional, default 0)
-               XTilt = 20,     -- sets the tilts of the orbit on the X Axis in degrees (optional, default 0)
-               YRotation = 23, -- sets the tilts of the orbit on the Y Axis in degrees (optional, default 0)
-               ZAxis = 390,    -- sets the tilts of the orbit on the Z Axis in degrees (optional, default 0)
+               Speed = 500,     -- sets how fast it orbits the origin in degrees/second (optional, default 0)
+               XTilt = 20,      -- sets the tilts of the orbit on the X Axis in degrees (optional, default 0)
+               YRotation = 23,  -- sets the tilts of the orbit on the Y Axis in degrees (optional, default 0)
+               ZTilt = 390,     -- sets the tilts of the orbit on the Z Axis in degrees (optional, default 0)
+			   TiltXOffset = 0, -- sets how offsetted the X Axis from 0 degrees (optional, default 0)
+			   AngleYOffset = 0,-- sets how offsetted the Y Axis from 0 degrees (optional, default 0)
+			   TiltZOffset = 0, -- sets how offsetted the Z Axis from 0 degrees (optional, default 0)
                OrbitalOrigin = Workspace.ExampleOrbitOrigin, -- this defines what the part should orbit around (required)
                OrbitalOffset = 5,        -- defines how far away the part should orbit around the origin (required)
                OrbitalFaceCenter = true  -- sets if the part should look at the origin when spinning (optional, default false)
@@ -93,11 +99,25 @@ local SCLI_CONFIGS = {
            }
            ]]
 		},
+		Teleporter = {
+			--[[
+           	Example Teleporter
+           	[Workspace.Teleporter] = { -- set the part you want to become a teleporter to the name of the part (this example shows a part named 'Teleporter')
+               	TargetPosition = Workspace.Target, -- sets the destination of the teleporter (optional, default 0)
+           	}
+           	]]
+		},
 	},
 
 	Types = {
 		Standable = { -- this type defines if the player should be able to move with the part if they're on it, you dont need to give parts this type if they only move up and down
-			-- should be in array format (ie: {workspace.Part2, workspace.Part})
+			-- should be in array format (ex: {workspace.Part2, workspace.Part})
+		},
+		IsPushable = { -- this will give parts unde this table to be repsawned from touching parts listed under the "PartRespawner" type
+			-- should be in array format (ex: {workspace.Part2, workspace.Part})
+		},
+		PartRespawner = { -- this will repspawn parts listed as "IsPushable"
+			-- should be in array format (ex: {workspace.Part2, workspace.Part})
 		},
 	},
 
@@ -110,12 +130,15 @@ local SCLI_CONFIGS = {
 	},
 }
 
+-- i wouldn't interact with anything past this!!!
+
 local CLI_Cache = {
 	Map = {},
 	Temp = {
 		Orbitial = {},
 		Mover = {},
 		Conveyor = {},
+		IsPushable = {}
 	},
 }
 
@@ -156,7 +179,16 @@ end
 
 -- imported
 local CheckRules = {
-	Spinner = { Optional = { XAxis = "number", YAxis = "number", ZAxis = "number" } },
+	Spinner = {
+		Optional = {
+			XAxis = "number",
+			YAxis = "number",
+			ZAxis = "number",
+			AngleXOffset = "number",
+			AngleYOffset = "number",
+			AngleZOffset = "number",
+		},
+	},
 	Orbital = {
 		OrbitalOrigin = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "Instance" or "Vector3",
 		OrbitalOffset = "number",
@@ -164,7 +196,10 @@ local CheckRules = {
 			OrbitalFaceCenter = "boolean",
 			XTilt = "number",
 			YRotation = "number",
-			ZAxis = "number",
+			ZTilt = "number",
+			TiltXOffset = "number",
+			AngleYOffset = "number",
+			TiltZOffset = "number",
 			Speed = "number",
 		},
 	},
@@ -272,14 +307,16 @@ local function ValidateClass(className, object, data, rules)
 		end
 	end
 
-	for propertyName in pairs(data) do
-		local known = rules[propertyName]
-			or (rules.Optional and rules.Optional[propertyName])
-			or (rules.Dependencies and rules.Dependencies[propertyName])
+	if SCLI_CONFIGS.FFlagsEditor.FFlageEnableWarningOnExtraProperties then
+		for propertyName in pairs(data) do
+			local known = rules[propertyName]
+				or (rules.Optional and rules.Optional[propertyName])
+				or (rules.Dependencies and rules.Dependencies[propertyName])
 
-		if not known then
-			LOGF("warn", `[{className}][{object.Name}]: unknown property "{propertyName}"`)
-			return false
+			if not known then
+				LOGF("warn", `[{className}][{object.Name}]: unknown property "{propertyName}"`)
+				return false
+			end
 		end
 	end
 
@@ -382,8 +419,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 						local result = ValidateClass(className, object, data, rules)
 
-						print(result)
-
 						if not result then
 							SCLI_CONFIGS[containerClass][className][object] = nil
 						end
@@ -404,18 +439,12 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 	end
 
-	for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
-		part.Touched:Connect(function()
-			lastCf = part.CFrame
-			currentTouchedStandable = part
-
-			part.TouchEnded:Once(function()
-				if currentTouchedStandable == part then
-					currentTouchedStandable = nil
-					lastCf = nil
-				end
-			end)
-		end)
+	for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
+		part.CFrame *= CFrame.Angles(
+			data.AngleXOffset and math.rad(data.AngleXOffset) or 0,
+			data.AngleYOffset and math.rad(data.AngleYOffset) or 0,
+			data.AngleZOffset and math.rad(data.AngleZOffset) or 0
+		)
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Mover) do
@@ -445,11 +474,50 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Conveyor) do
 		part.Touched:Connect(function(hit)
+			if hit.Parent ~= player.Character then return end
 			CLI_Cache.Temp.Conveyor[part] = true
 		end)
 
 		part.TouchEnded:Connect(function(hit)
+			if hit.Parent ~= player.Character then return end
 			CLI_Cache.Temp.Conveyor[part] = nil
+		end)
+	end
+
+	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
+		part.Touched:Connect(function(hit)
+			if hit.Parent ~= player.Character then return end
+			player.Character.Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position
+				or data.TargetPosition
+		end)
+	end
+
+	for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
+		part.Touched:Connect(function(hit)
+			if hit.Parent ~= character then return end
+			lastCf = part.CFrame
+			currentTouchedStandable = part
+
+			part.TouchEnded:Once(function()
+				if currentTouchedStandable == part then
+					currentTouchedStandable = nil
+					lastCf = nil
+				end
+			end)
+		end)
+	end
+
+	for _, part in ipairs(SCLI_CONFIGS.Types.IsPushable) do
+		CLI_Cache.Temp.IsPushable[part] = {CFrame = part.CFrame}
+	end
+
+	for _, part in ipairs(SCLI_CONFIGS.Types.PartRespawner) do
+		part.Touched:Connect(function(hit)
+			local cachedir = CLI_Cache.Temp.IsPushable[hit]
+
+			if cachedir then
+				hit.CFrame = CLI_Cache.Temp.IsPushable[part].CFrame
+			end
 		end)
 	end
 
@@ -475,6 +543,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 
 		for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
+			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then continue end
+
 			part.CFrame *= CFrame.Angles(
 				data.XAxis and math.rad(data.XAxis * dt) or 0,
 				data.YAxis and math.rad(data.YAxis * dt) or 0,
@@ -483,6 +553,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 
 		for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
+			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then continue end
+
 			local dir = CLI_Cache.Temp.Orbitial[part]
 
 			if not dir then
