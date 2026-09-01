@@ -16,6 +16,16 @@ The way I would recommend to update/downgrade your kit is by first getting the k
 ## Documentation
 Most of the documentation is already shown inside the `rasenObbyKit.luau` file as comments
 
+## Features
+This kit current features:
+|-|Object Type|Description|
+|-|-|-|
+|Spinner|Class|Spins a part on any axis|
+|Orbital|Class|Makes a part orbit a target part|
+|Mover|Class|Moves a part back and forth from its orginal position to a target part|
+|Conveyor|Class|Pushes a player on any axis as long the player touches the part|
+|Standable|Type|Makes a part able to hold players|
+
 ## Road Map
 |-|Coming in 0.2.0|Waiting for Studio updates|
 |-|-|-|
