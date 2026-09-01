@@ -124,8 +124,8 @@ local SCLI_CONFIGS = {
 	FFlagsEditor = { -- devtools, dont touch unless yk what ur doing
 		["DFFlagExportTextToOutput"] = true,
 		["FFlagUsePartInstanceOverVector3"] = true,
-		["FFlagEnableTypeCheckerExperiment"] = false,
-		["FFlageEnableWarningOnExtraProperties"] = false,
+		["FFlagEnableTypeCheckerExperiment"] = true,
+		["FFlageEnableWarningOnExtraProperties"] = true,
 		["FFlagDeferMainThread"] = true,
 	},
 }
