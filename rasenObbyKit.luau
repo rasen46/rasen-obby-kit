@@ -212,6 +212,9 @@ local CheckRules = {
 		Optional = { XAxis = "number", YAxis = "number", ZAxis = "number", BasedOnRotation = "boolean" },
 		Dependencies = { BasedOnRotation = { BaseSpeed = "number" } },
 	},
+	Teleporter = {
+		TargetPosition = "Instance"
+	},
 	Standable = {
 		FunctionCheck = function(b)
 			return b:IsA("BasePart")
@@ -307,7 +310,7 @@ local function ValidateClass(className, object, data, rules)
 		end
 	end
 
-	if SCLI_CONFIGS.FFlagsEditor.FFlageEnableWarningOnExtraProperties then
+	if SCLI_CONFIGS.FFlagsEditor.FFlagEnableWarningOnExtraProperties then
 		for propertyName in pairs(data) do
 			local known = rules[propertyName]
 				or (rules.Optional and rules.Optional[propertyName])
@@ -474,19 +477,16 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Conveyor) do
 		part.Touched:Connect(function(hit)
-			if hit.Parent ~= player.Character then return end
 			CLI_Cache.Temp.Conveyor[part] = true
 		end)
 
 		part.TouchEnded:Connect(function(hit)
-			if hit.Parent ~= player.Character then return end
 			CLI_Cache.Temp.Conveyor[part] = nil
 		end)
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
 		part.Touched:Connect(function(hit)
-			if hit.Parent ~= player.Character then return end
 			player.Character.Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position
 				or data.TargetPosition
 		end)
@@ -494,7 +494,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
 		part.Touched:Connect(function(hit)
-			if hit.Parent ~= character then return end
 			lastCf = part.CFrame
 			currentTouchedStandable = part
 
