@@ -2,7 +2,7 @@
 a client-side object handler for a game named "Vortex"
 
 ## Installation
-1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases`
+1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases` OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenObbyKit.luau`
 2. Create a new `LocalScript` under `StarterPlayerScripts` (this script can be named whatever you want it to be)
 3. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
 
