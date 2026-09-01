@@ -111,7 +111,8 @@ local SCLI_CONFIGS = {
 
     FFlagsEditor = { -- devtools, dont touch unless yk what ur doing
         ["DFFlagExportTextToOutput"] = true,
-        ["FFlagUsePartInstanceOverVector3"] = true
+        ["FFlagUsePartInstanceOverVector3"] = true,
+        ["FFlagDeferMainThread"] = true
     }
 }
 
@@ -194,8 +195,9 @@ UIS.InputEnded:Connect(function(inp)
 end)
 
 -- Main Thread
-task.defer(function()
+task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](function()
     -- boot
+    --[[
     for _, part in ipairs(Workspace:GetChildren()) do
         if part.ClassName ~= "Part" then continue end
 
@@ -206,6 +208,7 @@ task.defer(function()
 
         task.wait()
     end
+    ]]
 
     for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
         part.Touched:Connect(function()
