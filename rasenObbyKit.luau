@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.1.1 beta release
+version 0.2.0 dev build
 
 please dont strip credits from this
 ]]
@@ -112,6 +112,8 @@ local SCLI_CONFIGS = {
     FFlagsEditor = { -- devtools, dont touch unless yk what ur doing
         ["DFFlagExportTextToOutput"] = true,
         ["FFlagUsePartInstanceOverVector3"] = true,
+        ["FFlagEnableTypeCheckerExperiment"] = false,
+        ["FFlageEnableWarningOnExtraProperties"] = false,
         ["FFlagDeferMainThread"] = true
     }
 }
@@ -209,6 +211,46 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
         task.wait()
     end
     ]]
+
+    if SCLI_CONFIGS.FFlagsEditor.FFlagEnableTypeCheckerExperiment then
+        local CheckRules = {
+            Spinner = {
+                Optional = {
+                    XAxis = "number",
+                    YAxis = "number",
+                    ZAxis = "number"
+                }
+            },
+            Orbital = {
+                OrbitalOrigin = "Part",
+                OrbitalOffset = "number",
+                Optional = {
+                    OrbitalFaceCenter = "boolean"
+                    XTilt = 20,
+                    YRotation = 23,
+                    ZAxis = 390,
+                    Speed = 500,
+                },
+            },
+            Mover = {
+
+            },
+            Conveyor = {
+
+            },
+            Standable = {
+
+            }
+        }
+
+        for ContainerClass, ContainerObjects in pairs(SCLI_CONFIGS) do
+            if ContainerClass ~= 'Classes' or ContainerClass ~= "Types" then continue end
+
+            for ClassName, ClassChildren in pairs(ContainerObjects) do
+
+            end
+        end
+    end
 
     for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
         part.Touched:Connect(function()
