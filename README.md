@@ -20,6 +20,7 @@ Most of the documentation is already shown inside the `rasenObbyKit.luau` file a
 |-|Coming in 0.2.0|Waiting for Studio updates|
 |-|-|-|
 |Type Checking V1|yes|no|
+|Teleporter (Class)|yes|no|
 |Button (Class)|framework|yes|
 |ButtonDeactivate (Class)|framework|yes|
 |Damager (Class)|no|yes|
