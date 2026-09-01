@@ -32,12 +32,12 @@ This kit current features:
 ## Road Map
 |-|Coming in 0.3.0|Waiting for Studio updates|
 |-|-|-|
-|Button (Class)|no|yes|
-|ButtonDeactivate (Class)|no|yes|
+|Button (Class)|framework|yes|
+|ButtonDeactivate (Class)|framework|yes|
 |Damager (Class)|no|yes|
-|Fader (Class)|no|yes|
-|Beat Block Instance (Class)|no|yes|
-|Beat Block Group (Class)|no|yes|
+|Fader (Class)|framework|yes|
+|Beat Block Instance (Class)|framework|yes|
+|Beat Block Group (Class)|framework|yes|
 |PartRespawner (Type)|no|yes|
 |IsPushable (Type)|no|yes|
 |Instakill (Type)|no|yes|
