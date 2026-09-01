@@ -35,6 +35,8 @@ This kit current features:
 |ButtonDeactivate (Class)|framework|yes|
 |Damager (Class)|no|yes|
 |Fader (Class)|no|yes|
+|Beat Block Instance (Class)|no|yes|
+|Beat Block Group (Class)|no|yes|
 |PartRespawner (Type)|yes|yes|
 |IsPushable (Type)|yes|yes|
 |Instakill (Type)|no|yes|
