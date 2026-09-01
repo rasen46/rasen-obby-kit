@@ -22,26 +22,27 @@ This kit current features:
 |-|-|-|
 |Spinner|Class|Spins a part on any axis|
 |Orbital|Class|Makes a part orbit a target part|
-|Mover|Class|Moves a part back and forth from its orginal position to a target part|
-|Conveyor|Class|Pushes a player on any axis as long the player touches the part|
+|Mover|Class|Moves a part back and forth from its original position to a target part|
+|Conveyor|Class|Pushes a player on any axis as long as the player touches the part|
+|Teleporter|Class|Teleports the player to a target position|
 |Standable|Type|Makes a part able to hold players|
+|IsPushable|Type|Does not work for now|
+|PartReseter|Type|Does not work for now|
 
 ## Road Map
-|-|Coming in 0.2.0|Waiting for Studio updates|
+|-|Coming in 0.3.0|Waiting for Studio updates|
 |-|-|-|
-|Type Checking V1|yes|no|
-|Teleporter (Class)|yes|no|
-|Button (Class)|framework|yes|
-|ButtonDeactivate (Class)|framework|yes|
+|Button (Class)|no|yes|
+|ButtonDeactivate (Class)|no|yes|
 |Damager (Class)|no|yes|
 |Fader (Class)|no|yes|
 |Beat Block Instance (Class)|no|yes|
 |Beat Block Group (Class)|no|yes|
-|PartRespawner (Type)|yes|yes|
-|IsPushable (Type)|yes|yes|
+|PartRespawner (Type)|no|yes|
+|IsPushable (Type)|no|yes|
 |Instakill (Type)|no|yes|
 |LDM Mode (Config)|no|yes|
-|ActivePartDistance (Config)|yes|no|
-|Quick Reset|mostly|yes|
-|Improved Standable Calculations|maybe|yes|
-|Rotation Calculation Improvements|no|yes|
+|Quick Reset|yes|yes|
+|Multi-Obby loading|maybe|yes|
+|Improved Standable Calculations|yes|yes|
+|Improved Rotation Calculations|no|yes|
