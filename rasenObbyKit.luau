@@ -138,7 +138,7 @@ local CLI_Cache = {
 		Orbitial = {},
 		Mover = {},
 		Conveyor = {},
-		IsPushable = {}
+		IsPushable = {},
 	},
 }
 
@@ -213,7 +213,7 @@ local CheckRules = {
 		Dependencies = { BasedOnRotation = { BaseSpeed = "number" } },
 	},
 	Teleporter = {
-		TargetPosition = "Instance"
+		TargetPosition = "Instance",
 	},
 	Standable = {
 		FunctionCheck = function(b)
@@ -461,8 +461,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			{ Position = part.Position }
 		)
 
-		CLI_Cache.Temp.Orbitial[part] = dir
-
 		task.defer(function()
 			while task.wait() do
 				TweenTT:Play()
@@ -487,7 +485,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
 		part.Touched:Connect(function(hit)
-			player.Character.Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position
+			player.Character.Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3
+					and data.TargetPosition.Position
 				or data.TargetPosition
 		end)
 	end
@@ -507,7 +506,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	end
 
 	for _, part in ipairs(SCLI_CONFIGS.Types.IsPushable) do
-		CLI_Cache.Temp.IsPushable[part] = {CFrame = part.CFrame}
+		CLI_Cache.Temp.IsPushable[part] = { CFrame = part.CFrame }
 	end
 
 	for _, part in ipairs(SCLI_CONFIGS.Types.PartRespawner) do
@@ -542,7 +541,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 
 		for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then continue end
+			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
+				continue
+			end
 
 			part.CFrame *= CFrame.Angles(
 				data.XAxis and math.rad(data.XAxis * dt) or 0,
@@ -552,7 +553,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 
 		for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then continue end
+			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
+				continue
+			end
 
 			local dir = CLI_Cache.Temp.Orbitial[part]
 
@@ -565,15 +568,21 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 			dir.Angle += math.rad(data.Speed) * dt
 
-			local off =
+			local orbitRotation =
 				CFrame.Angles(math.rad(data.XTilt or 0), math.rad(data.YRotation or 0), math.rad(data.ZAxis or 0))
-					:VectorToWorldSpace(
-						Vector3.new(
-							math.cos(dir.Angle) * (data.OrbitalOffset or 0),
-							0,
-							math.sin(dir.Angle) * (data.OrbitalOffset or 0)
-						)
-					)
+			local offsetRotation = CFrame.Angles(
+				math.rad(data.TiltXOffset or 0),
+				math.rad(data.AngleYOffset or 0),
+				math.rad(data.TiltZOffset or 0)
+			)
+			local orbitCFrame = orbitRotation * offsetRotation
+			local off = orbitCFrame:VectorToWorldSpace(
+				Vector3.new(
+					math.cos(dir.Angle) * (data.OrbitalOffset or 0),
+					0,
+					math.sin(dir.Angle) * (data.OrbitalOffset or 0)
+				)
+			)
 
 			local pos = (
 				SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
