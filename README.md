@@ -8,3 +8,18 @@ a client-side object handler for a game named "Vortex"
 
 ## Documentation
 Most of the documentation is already shown inside the `rasenObbyKit.luau` file as comments
+
+## Road Map
+|-|Coming in 0.2.0|Waiting for Studio updates|
+|-|-|-|
+|Type Checking V1|yes|no|
+|Button (Class)|framework|yes|
+|ButtonDeactivate (Class)|framework|yes|
+|Damager (Class)|no|yes|
+|Fader (Class)|no|yes|
+|PartRespawner (Type)|yes|yes|
+|IsPushable (Type)|yes|yes|
+|Instakill (Type)|no|yes|
+|Quick Reset|mostly|yes|
+|Improved Standable Calculations|maybe|yes|
+|Rotation Calculation Improvements|no|yes|
