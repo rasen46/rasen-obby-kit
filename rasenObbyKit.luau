@@ -334,17 +334,18 @@ UIS.InputBegan:Connect(function(inp, pro)
 	end
 
 	local keyEvent = DCLI_CONFIGS.KEYBINDS[inp.KeyCode]
+	local character = player.Character
 	if keyEvent then
 		if not DCLI_CONFIGS.VALUES.LegitMode then
 			if keyEvent == "SetCheckpoint" then
 				cCount += 1
-				Checkpoints[cCount] = player.Character.Position
+				Checkpoints[cCount] = character.Position
 			elseif keyEvent == "GoToLatestCheckpoint" then
 				local pos = Checkpoints[cCount] or spawnLocation.Position
 				if not pos then
 					return
 				end
-				player.Character.Position = pos
+				character .Position = pos
 			elseif keyEvent == "RemoveLatestCheckpoint" then
 				if not Checkpoints[cCount] then
 					return
@@ -535,8 +536,10 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			heldQRTime = 0
 		end
 
+		local character = player.Character
+
 		for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
+			if (part.Position - character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
 				continue
 			end
 
@@ -548,7 +551,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 
 		for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-			if (part.Position - player.Character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
+			if (part.Position - character.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
 				continue
 			end
 
@@ -601,19 +604,14 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 		end
 
-		player.Character.Position += playerAddedForce * dt
+		character.Position += playerAddedForce * dt
 
-		if currentTouchedStandable and lastCf then
-			local character = player.Character
-
-			if character then
-				local currentCf = currentTouchedStandable.CFrame
-				local relativePosition = lastCf:PointToObjectSpace(character.Position)
-				local newPosition = currentCf:PointToWorldSpace(relativePosition)
-				character.Position += newPosition - character.Position
-
-				lastCf = currentCf
-			end
+		if currentTouchedStandable and lastCf and character then
+			local currentCf = currentTouchedStandable.CFrame
+			local relativePosition = lastCf:PointToObjectSpace(character.Position)
+			local newPosition = currentCf:PointToWorldSpace(relativePosition)
+			character.Position += newPosition - character.Position
+			lastCf = currentCf
 		end
 	end
 end)
