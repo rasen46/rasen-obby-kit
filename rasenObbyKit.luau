@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.2.0 beta release
+version 0.2.1 dev release
 
 please dont strip credits from this
 ]]
