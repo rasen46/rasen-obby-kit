@@ -32,17 +32,18 @@ This kit current features:
 ## Road Map
 |-|Coming in 0.3.0|Waiting for Studio updates|
 |-|-|-|
-|Button (Class)|framework|yes|
-|ButtonDeactivate (Class)|framework|yes|
-|Damager (Class)|no|yes|
-|Fader (Class)|framework|yes|
-|Beat Block Instance (Class)|framework|yes|
-|Beat Block Group (Class)|framework|yes|
-|PartRespawner (Type)|no|yes|
-|IsPushable (Type)|no|yes|
-|Instakill (Type)|no|yes|
-|LDM Mode (Config)|no|yes|
-|Quick Reset|yes|yes|
-|Multi-Obby loading|maybe|yes|
-|Improved Standable Calculations|yes|yes|
-|Improved Rotation Calculations|no|yes|
+|Button (Class)|framework|yes (Part property write access)|
+|ButtonDeactivate (Class)|framework|yes (Part property write access)|
+|Damager (Class)|no|yes (Humanoid Health write access)|
+|Fader (Class)|framework|yes (Part property write access)|
+|Beat Block Instance (Class)|framework|no|
+|Beat Block Group (Class)|framework|yes (Part property write access)|
+|PartRespawner (Type)|framework|yes (Part property write access)|
+|IsPushable (Type)|deprecated soon|no|
+|Instakill (Type)|no|yes (Humanoid Health write access)|
+|LDM Mode (Config)|no|yes (Part property write access)|
+|Quick Reset|yes|yes (Part property write access)|
+|All jump Indicators|framework| yes (Part property write access)|
+|Multi-Obby loading|maybe|yes (Part property write access)|
+|Improved Standable Calculations|yes|yes (Character CFrame write access)|
+|Improved Rotation Calculations|no|yes (Part Vector3 Improvements)|
