@@ -2,7 +2,7 @@
 a client-side object handler for a game named "Vortex"
 
 ## Installation
-1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases`
+1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases` OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenObbyKit.luau`
 2. Create a new `LocalScript` under `StarterPlayerScripts` (this script can be named whatever you want it to be)
 3. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
 
@@ -32,17 +32,18 @@ This kit current features:
 ## Road Map
 |-|Coming in 0.3.0|Waiting for Studio updates|
 |-|-|-|
-|Button (Class)|no|yes|
-|ButtonDeactivate (Class)|no|yes|
-|Damager (Class)|no|yes|
-|Fader (Class)|no|yes|
-|Beat Block Instance (Class)|no|yes|
-|Beat Block Group (Class)|no|yes|
-|PartRespawner (Type)|no|yes|
-|IsPushable (Type)|no|yes|
-|Instakill (Type)|no|yes|
-|LDM Mode (Config)|no|yes|
-|Quick Reset|yes|yes|
-|Multi-Obby loading|maybe|yes|
-|Improved Standable Calculations|yes|yes|
-|Improved Rotation Calculations|no|yes|
+|Button (Class)|framework|yes (Part property write access)|
+|ButtonDeactivate (Class)|framework|yes (Part property write access)|
+|Damager (Class)|no|yes (Humanoid Health write access)|
+|Fader (Class)|framework|yes (Part property write access)|
+|Beat Block Instance (Class)|framework|no|
+|Beat Block Group (Class)|framework|yes (Part property write access)|
+|PartRespawner (Type)|framework|yes (Part property write access)|
+|IsPushable (Type)|deprecated soon|no|
+|Instakill (Type)|no|yes (Humanoid Health write access)|
+|LDM Mode (Config)|no|yes (Part property write access)|
+|Quick Reset|yes|yes (Part property write access)|
+|All jump Indicators|framework| yes (Part property write access)|
+|Multi-Obby loading|maybe|yes (Part property write access)|
+|Improved Standable Calculations|yes|yes (Character CFrame write access)|
+|Improved Rotation Calculations|no|yes (Part Vector3 Improvements)|
