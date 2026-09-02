@@ -481,7 +481,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for _, part in ipairs(SCLI_CONFIGS.Types.Standable) do
+	for i=1, #SCLI_CONFIGS.Types.Standable do
+		local part = SCLI_CONFIGS.Types.Standable[i]
 		part.Touched:Connect(function(hit)
 			if currentTouchedStandable ~= part then
 				currentTouchedStandable = part
@@ -497,11 +498,13 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for _, part in ipairs(SCLI_CONFIGS.Types.IsPushable) do
+	for i=1, #CLI_CONFIGS.Types.IsPushable do
+		local part = SCLI_CONFIGS.Types.IsPushable[i]
 		CLI_Cache.Temp.IsPushable[part] = { CFrame = part.CFrame }
 	end
 
-	for _, part in ipairs(SCLI_CONFIGS.Types.PartRespawner) do
+	for i=1, #SCLI_CONFIGS.Types.PartRespawner do
+		local part = SCLI_CONFIGS.Types.PartRespawner[i]
 		part.Touched:Connect(function(hit)
 			local cachedir = CLI_Cache.Temp.IsPushable[hit]
 
