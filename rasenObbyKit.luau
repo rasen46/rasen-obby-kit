@@ -574,7 +574,9 @@ UIS.InputBegan:Connect(function(inp, pro)
 			if keyEvent == "SetCheckpoint" then
 				cCount += 1
 				local n = createAJPart()
-				n.Position = DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP and (playerCharacter.Position + Vector3.new(0,2.5,0)) or playerCharacter.Position
+				n.Position = DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP
+						and (playerCharacter.Position + Vector3.new(0, 2.5, 0))
+					or playerCharacter.Position
 				CheckpointParts[cCount] = n
 				Checkpoints[cCount] = playerCharacter.Position
 			elseif keyEvent == "GoToLatestCheckpoint" then
@@ -918,7 +920,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end
 			end
 
-			local result = raycast(playerCharacter.Position + Vector3.new(0,3,0), Vector3.new(0, -3, 0), {})
+			local result = raycast(playerCharacter.Position + Vector3.new(0, 3, 0), Vector3.new(0, -3, 0), {})
 
 			if result and result.normal.Y > 0.5 then
 				local standable = result.part
