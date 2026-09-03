@@ -45,7 +45,7 @@ local DCLI_CONFIGS = {
 	},
 }
 
--- the obby kit (practically) (dont change this if ur playing the obby, as it will modify gameplay)
+-- the obby kit (practically) (dont change this if ur playing the obby, as it could modify gameplay)
 local SCLI_CONFIGS = {
 	Classes = {
 		Spinner = {
@@ -111,7 +111,7 @@ local SCLI_CONFIGS = {
 			[Workspace.Teleporter] = { -- set the part you want to become a teleporter to the name of the part (this example shows a part named 'Teleporter')
 				TargetPosition = Workspace.Target, -- sets the destination of the teleporter (optional, default 0)
 				AllowParts = false, -- sets if parts can be teleported by teleporters (optional, default false)
-				AllowHumanoids = true, sets if Humanoids (or player characters) can be teleported by teleporters (optional, default true)
+				AllowHumanoids = true, -- sets if Humanoids (or player characters) can be teleported by teleporters (optional, default true)
 			}
 			]]
 		},
@@ -543,6 +543,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
 		local playerCharacter = player.Character
 
+		if data.AllowHumanoids == nil then data.AllowHumanoids = true end
+
 		part.Touched:Connect(function(hit)
 			if
 				data.AllowHumanoids
@@ -587,6 +589,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			}
 		)
 
+		if data.AllowHumanoids == nil then data.AllowHumanoids = true end
+
 		part.Touched:Connect(function(hit)
 			if not canFade then
 				return
@@ -594,7 +598,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			local humanoid = hit.Parent and hit.Parent.Humanoid
 			if data.AllowHumanoids and humanoid then
 				canFade = false
-				data.ConnectOnTrigger(part)
+				if data.ConnectOnTrigger then data.ConnectOnTrigger(part) end
 
 				TweenTT:Play()
 				TweenTT.Completed:Wait()
@@ -609,7 +613,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 			if data.AllowParts then
 				canFade = false
-				data.ConnectOnTrigger(part)
+				if data.ConnectOnTrigger then data.ConnectOnTrigger(part) end
 
 				TweenTT:Play()
 				TweenTT.Completed:Wait()
