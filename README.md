@@ -8,7 +8,7 @@ a client-side object handler for a game named "Vortex"
 4. Create a new `Script` under `ServerScriptService` (this script can be also named whatever you want it to be)
 5. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
 6.  Paste the contents of `rasenServerSide.luau` into the `Script` you just created
-7.  And you're done; you can edit CO inside the `rasenObbyKit.luau` file (or the `LocalScript` under `SCLI_CONFIGS`)
+7.  And you're done; you can edit CO inside the `LocalScript` you just made under `SCLI_CONFIGS`
 
 ## Updating or downgrading the kit
 You can simply transfer the `SCLI_CONFIGS` from your current kit to the one you want to use
