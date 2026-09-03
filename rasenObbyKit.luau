@@ -30,14 +30,14 @@ local DCLI_CONFIGS = {
 	},
 	VALUES = { -- changes some configs with how stuff look and work
 		LegitMode = false, -- Toggles the ability to use All-jump Utilities
-		EnableQuickReset = false, -- Toggles the ability to Quick Reset (disabled for now due to problems with getting part properties)
+		EnableQuickReset = false, -- Toggles the ability to Quick Reset (disabled for now)
 		QRClearCheckpoints = false, -- Toggles if using Quick Reset will clear all-jump progress
 		RespawnAtLastCheckPoint = true, -- Toggles if dying will spawn you at your last checkpoint or at the default SpawnLocation
 		ActivePartDistance = 100, -- The maximum distance where spinners, orbital, and conveyors will remain active from the player (MIN: 50) (not inplemented yet)
 		QuickResetDuration = 2, -- The amount of time required to have the Quick Reset Key being held down to reset the game
 
-		AllJumpConfig = { -- configurations with how All-jump indicators look like (disabled for now due to CanCollide read/write restrictions)
-			ShowIndicators = false,
+		AllJumpConfig = { -- configurations with how All-jump indicators look like
+			ShowIndicators = true,
 			CentertoHRP = true,
 			Color3 = Color3.new(1, 1, 1),
 			Size = Vector3.new(0.25, 0.25, 0.25),
