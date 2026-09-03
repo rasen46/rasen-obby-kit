@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.0 dev release
+version 0.3.0 beta release
 
 please dont strip credits from this
 ]]
@@ -574,15 +574,15 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		local originalTransparency = part.Transparency
 		local origin = part.Position
 		local TweenTT =
-			TweenService:Create(part, TweenInfo.new(data.Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
-				Transparency = data.LerpTransparency and (data.TargetTransparency or 1) or originalTransparency,
+			TweenService:Create(part, TweenInfo.new(data.Duration, Enum.EasingStyle.Linear), {
+				Transparency = data.LerpTransparency and originalTransparency or data.TargetTransparency or 1,
 				Position = data.TargetPosition
 						and (SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position or data.TargetPosition)
 					or origin,
 			})
 		local TweenTO = TweenService:Create(
 			part,
-			TweenInfo.new(data.RespawnDuration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+			TweenInfo.new(data.RespawnDuration or 1, Enum.EasingStyle.Linear),
 			{
 				Transparency = originalTransparency,
 				Position = origin,
@@ -603,7 +603,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				TweenTT:Play()
 				TweenTT.Completed:Wait()
 				part.CanCollide = false
-				task.wait(data.RespawnDelay or 0)
+				task.wait(data.RespawnDelay or 1)
 
 				part.CanCollide = true
 				TweenTO:Play()
