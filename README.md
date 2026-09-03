@@ -25,25 +25,23 @@ This kit current features:
 |Mover|Class|Moves a part back and forth from its original position to a target part|
 |Conveyor|Class|Pushes a player on any axis as long as the player touches the part|
 |Teleporter|Class|Teleports the player to a target position|
+|Damager|Class|Damages the player|
+|Fader|Class|Makes a part fade if touched
 |Standable|Type|Makes a part able to hold players|
 |IsPushable|Type|Does not work for now|
 |PartReseter|Type|Does not work for now|
+|Instakill|Type|Instakills the player|
 
 ## Road Map
-|-|Coming in 0.3.0|Waiting for Studio updates|
+|-|Coming in 0.4.0|Waiting for Studio updates|
 |-|-|-|
-|Button (Class)|framework|yes (Part property write access)|
-|ButtonDeactivate (Class)|framework|yes (Part property write access)|
-|Damager (Class)|no|yes (Humanoid Health write access)|
-|Fader (Class)|framework|yes (Part property write access)|
-|Beat Block Instance (Class)|framework|no|
-|Beat Block Group (Class)|framework|yes (Part property write access)|
-|PartRespawner (Type)|framework|yes (Part property write access)|
-|IsPushable (Type)|deprecated soon|no|
-|Instakill (Type)|no|yes (Humanoid Health write access)|
-|LDM Mode (Config)|no|yes (Part property write access)|
-|Quick Reset|yes|yes (Part property write access)|
-|All jump Indicators|framework| yes (Part property write access)|
-|Multi-Obby loading|maybe|yes (Part property write access)|
-|Improved Standable Calculations|yes|yes (Character CFrame write access)|
-|Improved Rotation Calculations|no|yes (Part Vector3 Improvements)|
+|Button (Class)|in progress|no|
+|ButtonDeactivate (Class)|in progress|no|
+|Beat Block Instance (Class)|in progress|no|
+|Beat Block Group (Class)|in progress|no|
+|PartRespawner (Type)|in progress|no|
+|LDM Mode (Config)|framework|no|
+|Quick Reset|yes|no|
+|Multi-Obby loading|yes|no|
+|Improved Standable Calculations|no|yes (waiting for better CFrame handling)|
+|Improved Rotation Calculations|no|yes (waiting for better Vector Handling)|
