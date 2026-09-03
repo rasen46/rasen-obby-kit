@@ -47,5 +47,4 @@ This kit current features:
 |LDM Mode (Config)|framework|no|
 |Quick Reset|yes|no|
 |Multi-Obby loading|yes|no|
-|Improved Standable Calculations|no|yes (waiting for better CFrame handling)|
 |Improved Rotation Calculations|no|yes (waiting for better Vector Handling)|

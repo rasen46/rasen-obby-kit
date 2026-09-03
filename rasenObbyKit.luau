@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.0 beta release
+version 0.3.1 beta release
 
 please dont strip credits from this
 ]]
@@ -171,6 +171,7 @@ local CLI_Cache = {
 	},
 }
 
+local CheckpointParts = {}
 local Checkpoints = {}
 local cCount = 0
 
@@ -388,6 +389,178 @@ local function ValidateClass(className, object, data, rules)
 	return true
 end
 
+-- raycast function (multi part) [@LowPolyCat]
+local allParts = nil
+local lastBlockedSet = {}
+local lastBlockedCount = 0
+
+local function blockedListChanged(blocked)
+	if #blocked ~= lastBlockedCount then
+		return true
+	end
+
+	for _, p in pairs(blocked) do
+		if not lastBlockedSet[p._id] then
+			return true -- same size but not the same parts, so its a swap
+		end
+	end
+
+	return false
+end
+
+local function buildPartsList(blocked)
+	local blockedSet = {}
+	for _, p in pairs(blocked) do
+		blockedSet[p._id] = true
+	end
+
+	allParts = {}
+
+	local function scan(inst, list)
+		for _, child in pairs(list and inst or inst:GetChildren()) do
+			if child:IsA("BasePart") and not blockedSet[child._id] then
+				table.insert(allParts, child)
+			end
+			scan(child)
+		end
+	end
+
+	scan(SCLI_CONFIGS.Types.Standable, true)
+
+	lastBlockedSet = blockedSet
+	lastBlockedCount = #blocked
+end
+
+local function raycastPart(pos, rayDir, maxDist, part)
+	local cf = part.CFrame
+	local half = part.Size * 0.5
+
+	-- move the ray into the parts local space so rotated parts work fine too
+	local localPos = cf:PointToObjectSpace(pos)
+	local localDir = cf:VectorToObjectSpace(rayDir)
+
+	local minB = -half
+	local maxB = half
+
+	local tMin = -math.huge
+	local tMax = math.huge
+	local normal = Vector3.new(0, 0, 0) -- please make Vector3.zero halo
+
+	-- X axis
+	if localDir.X ~= 0 then
+		local t1 = (minB.X - localPos.X) / localDir.X
+		local t2 = (maxB.X - localPos.X) / localDir.X
+
+		local sign = 1
+		if t1 > t2 then
+			t1, t2 = t2, t1
+			sign = -1
+		end
+
+		if t1 > tMin then
+			tMin = t1
+			normal = Vector3.new(-sign, 0, 0)
+		end
+
+		if t2 < tMax then
+			tMax = t2
+		end
+	elseif localPos.X < minB.X or localPos.X > maxB.X then
+		return nil
+	end
+
+	-- Y axis
+	if localDir.Y ~= 0 then
+		local t1 = (minB.Y - localPos.Y) / localDir.Y
+		local t2 = (maxB.Y - localPos.Y) / localDir.Y
+
+		local sign = 1
+		if t1 > t2 then
+			t1, t2 = t2, t1
+			sign = -1
+		end
+
+		if t1 > tMin then
+			tMin = t1
+			normal = Vector3.new(0, -sign, 0)
+		end
+
+		if t2 < tMax then
+			tMax = t2
+		end
+	elseif localPos.Y < minB.Y or localPos.Y > maxB.Y then
+		return nil
+	end
+
+	-- Z axis
+	if localDir.Z ~= 0 then
+		local t1 = (minB.Z - localPos.Z) / localDir.Z
+		local t2 = (maxB.Z - localPos.Z) / localDir.Z
+
+		local sign = 1
+		if t1 > t2 then
+			t1, t2 = t2, t1
+			sign = -1
+		end
+
+		if t1 > tMin then
+			tMin = t1
+			normal = Vector3.new(0, 0, -sign)
+		end
+
+		if t2 < tMax then
+			tMax = t2
+		end
+	elseif localPos.Z < minB.Z or localPos.Z > maxB.Z then
+		return nil
+	end
+
+	if tMin > tMax or tMin < 0 or tMin > maxDist then
+		return nil
+	end
+
+	return {
+		part = part,
+		position = pos + rayDir * tMin,
+		normal = cf:VectorToWorldSpace(normal),
+		distance = tMin,
+	}
+end
+
+local function raycast(pos, dir, blocked)
+	blocked = blocked or {}
+
+	if allParts == nil or blockedListChanged(blocked) then
+		buildPartsList(blocked)
+	end
+
+	local maxDist = math.sqrt(dir.X ^ 2 + dir.Y ^ 2 + dir.Z ^ 2)
+	local rayDir = Vector3.new(dir.X / maxDist, dir.Y / maxDist, dir.Z / maxDist)
+
+	local closest = nil
+
+	for _, part in pairs(allParts) do
+		local result = raycastPart(pos, rayDir, maxDist, part)
+		if result and (not closest or result.distance < closest.distance) then
+			closest = result
+		end
+	end
+
+	return closest
+end
+
+local function createAJPart()
+	local newPart = Instance.new("Part")
+	newPart.CanCollide = false
+	newPart.Anchored = true
+	newPart.Transparency = DCLI_CONFIGS.VALUES.AllJumpConfig.ShowIndicators and 0.5 or 1
+	newPart.Color = DCLI_CONFIGS.VALUES.AllJumpConfig.Color3
+	newPart.Size = DCLI_CONFIGS.VALUES.AllJumpConfig.Size
+	newPart.Parent = workspace
+
+	return newPart
+end
+
 UIS.InputBegan:Connect(function(inp, pro)
 	if pro then
 		return
@@ -400,6 +573,9 @@ UIS.InputBegan:Connect(function(inp, pro)
 		if not DCLI_CONFIGS.VALUES.LegitMode then
 			if keyEvent == "SetCheckpoint" then
 				cCount += 1
+				local n = createAJPart()
+				n.Position = DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP and (playerCharacter.Position + Vector3.new(0,2.5,0)) or playerCharacter.Position
+				CheckpointParts[cCount] = n
 				Checkpoints[cCount] = playerCharacter.Position
 			elseif keyEvent == "GoToLatestCheckpoint" then
 				local pos = Checkpoints[cCount] or spawnLocation.Position
@@ -411,6 +587,8 @@ UIS.InputBegan:Connect(function(inp, pro)
 				if not Checkpoints[cCount] then
 					return
 				end
+				CheckpointParts[cCount]:Destroy()
+				CheckpointParts[cCount] = nil
 				Checkpoints[cCount] = nil
 				cCount -= 1
 			end
@@ -543,7 +721,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
 		local playerCharacter = player.Character
 
-		if data.AllowHumanoids == nil then data.AllowHumanoids = true end
+		if data.AllowHumanoids == nil then
+			data.AllowHumanoids = true
+		end
 
 		part.Touched:Connect(function(hit)
 			if
@@ -573,23 +753,20 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		local canFade = true
 		local originalTransparency = part.Transparency
 		local origin = part.Position
-		local TweenTT =
-			TweenService:Create(part, TweenInfo.new(data.Duration, Enum.EasingStyle.Linear), {
-				Transparency = data.LerpTransparency and originalTransparency or data.TargetTransparency or 1,
-				Position = data.TargetPosition
-						and (SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position or data.TargetPosition)
-					or origin,
-			})
-		local TweenTO = TweenService:Create(
-			part,
-			TweenInfo.new(data.RespawnDuration or 1, Enum.EasingStyle.Linear),
-			{
-				Transparency = originalTransparency,
-				Position = origin,
-			}
-		)
+		local TweenTT = TweenService:Create(part, TweenInfo.new(data.Duration, Enum.EasingStyle.Linear), {
+			Transparency = data.LerpTransparency and originalTransparency or data.TargetTransparency or 1,
+			Position = data.TargetPosition
+					and (SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position or data.TargetPosition)
+				or origin,
+		})
+		local TweenTO = TweenService:Create(part, TweenInfo.new(data.RespawnDuration or 1, Enum.EasingStyle.Linear), {
+			Transparency = originalTransparency,
+			Position = origin,
+		})
 
-		if data.AllowHumanoids == nil then data.AllowHumanoids = true end
+		if data.AllowHumanoids == nil then
+			data.AllowHumanoids = true
+		end
 
 		part.Touched:Connect(function(hit)
 			if not canFade then
@@ -598,7 +775,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			local humanoid = hit.Parent and hit.Parent.Humanoid
 			if data.AllowHumanoids and humanoid then
 				canFade = false
-				if data.ConnectOnTrigger then data.ConnectOnTrigger(part) end
+				if data.ConnectOnTrigger then
+					data.ConnectOnTrigger(part)
+				end
 
 				TweenTT:Play()
 				TweenTT.Completed:Wait()
@@ -613,7 +792,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 			if data.AllowParts then
 				canFade = false
-				if data.ConnectOnTrigger then data.ConnectOnTrigger(part) end
+				if data.ConnectOnTrigger then
+					data.ConnectOnTrigger(part)
+				end
 
 				TweenTT:Play()
 				TweenTT.Completed:Wait()
@@ -625,23 +806,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				TweenTO.Completed:Wait()
 
 				canFade = true
-			end
-		end)
-	end
-
-	for i = 1, #SCLI_CONFIGS.Types.Standable do
-		local part = SCLI_CONFIGS.Types.Standable[i]
-		part.Touched:Connect(function(hit)
-			if currentTouchedStandable ~= part then
-				currentTouchedStandable = part
-				lastCf = part.CFrame
-			end
-		end)
-
-		part.TouchEnded:Connect(function(hit)
-			if currentTouchedStandable == part then
-				currentTouchedStandable = nil
-				lastCf = nil
 			end
 		end)
 	end
@@ -754,12 +918,34 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end
 			end
 
-			if currentTouchedStandable and lastCf and playerCharacter then
+			local result = raycast(playerCharacter.Position + Vector3.new(0,3,0), Vector3.new(0, -3, 0), {})
+
+			if result and result.normal.Y > 0.5 then
+				local standable = result.part
+				if currentTouchedStandable ~= standable then
+					currentTouchedStandable = standable
+					lastCf = standable.CFrame
+				end
+			else
+				currentTouchedStandable = nil
+				lastCf = nil
+			end
+
+			if currentTouchedStandable and lastCf then
 				local currentCf = currentTouchedStandable.CFrame
-				local relativePosition = lastCf:PointToObjectSpace(playerCharacter.Position)
-				local newPosition = currentCf:PointToWorldSpace(relativePosition)
+				local offset = playerCharacter.Position - lastCf.Position
+
+				local localX = offset:Dot(lastCf.XVector)
+				local localY = offset:Dot(lastCf.YVector)
+				local localZ = offset:Dot(lastCf.ZVector)
+
+				local newPosition = currentCf.Position
+					+ currentCf.XVector * localX
+					+ currentCf.YVector * localY
+					+ currentCf.ZVector * localZ
 
 				playerCharacter.Position += newPosition - playerCharacter.Position
+
 				lastCf = currentCf
 			end
 		end, function(err)
