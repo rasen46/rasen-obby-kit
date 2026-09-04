@@ -33,11 +33,12 @@ This kit current features:
 |Fader|Class|Makes a part fade if touched|
 |Button|Class|Modifies a object's properties or runs a function after being triggered|
 |ButtonDeactivate|Class|Deactivates a button (does not work for now)|
+|PlayerProperties|Class|Changes the properties of the player for an amount of time|
 |Standable|Type|Makes a part able to hold players|
 |IsPushable|Type|Does not work for now|
 |PartReseter|Type|Does not work for now|
 |Instakill|Type|Instakills the player|
-|BeatBlockGroup|Group|Allows for cycling of part property changing|
+|BeatBlockGroup|Group|Allows for cycling of part property changes|
 
 ## Road Map
 |-|Coming in 0.4.0|Waiting for Studio updates|
