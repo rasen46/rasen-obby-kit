@@ -8,19 +8,21 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.1.0 dev release (server)
+version 0.1.1 dev release (server)
 
 please dont strip credits from this
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
-local rOK_PlayerEvent = Instance.new("RemoteEvent")
+rOK_PlayerEvent = ReplicatedStorage.rOK_PlayerEvent or Instance.new("RemoteEvent")
 rOK_PlayerEvent.Name = "rOK_PlayerEvent"
 rOK_PlayerEvent.Parent = ReplicatedStorage
 
-rOK_PlayerEvent.OnServerEvent:Connect(function(player, EType, ...)
-    local args = ...
+rOK_PlayerEvent.OnServerEvent:Connect(function(userId, EType, ...)
+    local player = Players:GetPlayers()[userId]
+    local args = {...}
     
     if EType == "damage" then
         local hum = player.Character:FindFirstChildOfClass("Humanoid")

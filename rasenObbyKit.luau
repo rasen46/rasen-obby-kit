@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.2 beta release
+version 0.3.3 beta release
 
 please dont strip credits from this
 ]]
@@ -221,6 +221,7 @@ local SCLI_CONFIGS = {
 local CLI_Cache = {
 	Map = {},
 	Temp = {
+		Spinner = {},
 		Orbitial = {},
 		Mover = {},
 		Conveyor = {},
@@ -299,8 +300,7 @@ local CheckRules = {
 	},
 	Mover = {
 		TargetPosition = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "table" or "Vector3",
-		Duration = "number",
-		Optional = { LoopDelay = "number", TweenInfo = "table" },
+		Optional = { LoopDelay = "number", TweenInfo = "table", Duration = "number" },
 	},
 	Conveyor = {
 		Optional = { XAxis = "number", YAxis = "number", ZAxis = "number", BasedOnRotation = "boolean" },
@@ -325,6 +325,9 @@ local CheckRules = {
 			AllowParts = "boolean",
 			AllowHumanoids = "boolean",
 			ConnectOnTrigger = "function",
+			TargetPosition = "table",
+			TweenOut = "table",
+			TweenIn = "table",
 		},
 	},
 	PlayerProperty = {
@@ -348,7 +351,7 @@ local CheckRules = {
 			ActivateOnPart = "boolean",
 			Modify = "table",
 			OnActivate = "function",
-			OnAOnDeactivatectivate = "function",
+			OnDeactivate = "function",
 		},
 	},
 	Standable = {
@@ -766,18 +769,18 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			data.AngleYOffset and math.rad(data.AngleYOffset) or 0,
 			data.AngleZOffset and math.rad(data.AngleZOffset) or 0
 		)
+
+		CLI_Cache.Temp.Spinner[part] =
+			{ math.rad(data.XAxis or 0), math.rad(data.YAxis or 0), math.rad(data.ZAxis or 0) }
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Mover) do
-		local TweenTT = TweenService:Create(part, data.Tween or TweenInfo.new(data.Duration, Enum.EasingStyle.Linear), {
+		local TweenTT = TweenService:Create(part, data.Tween or TweenInfo.new(data.Duration), {
 			Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position
 				or data.TargetPosition,
 		})
-		local TweenTO = TweenService:Create(
-			part,
-			data.Tween or TweenInfo.new(data.Duration, Enum.EasingStyle.Linear),
-			{ Position = part.Position }
-		)
+		local TweenTO =
+			TweenService:Create(part, data.Tween or TweenInfo.new(data.Duration), { Position = part.Position })
 
 		task.defer(function()
 			while task.wait() do
@@ -793,7 +796,19 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-		CLI_Cache.Temp.Orbitial[part] = 0
+		local orbitRotation =
+			CFrame.Angles(math.rad(data.XTilt or 0), math.rad(data.YRotation or 0), math.rad(data.ZTilt or 0))
+		local offsetRotation = CFrame.Angles(
+			math.rad(data.TiltXOffset or 0),
+			math.rad(data.AngleYOffset or 0),
+			math.rad(data.TiltZOffset or 0)
+		)
+		local orbitCFrame = orbitRotation * offsetRotation
+
+		CLI_Cache.Temp.Orbitial[part] = {
+			curAngle = 0,
+			orbitCFrame = orbitCFrame,
+		}
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Conveyor) do
@@ -841,13 +856,13 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		local canFade = true
 		local originalTransparency = part.Transparency
 		local origin = part.Position
-		local TweenTT = TweenService:Create(part, TweenInfo.new(data.Duration, Enum.EasingStyle.Linear), {
+		local TweenTT = TweenService:Create(part, data.TweenOut or TweenInfo.new(data.Duration), {
 			Transparency = data.LerpTransparency and originalTransparency or data.TargetTransparency or 1,
 			Position = data.TargetPosition
 					and (SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position or data.TargetPosition)
 				or origin,
 		})
-		local TweenTO = TweenService:Create(part, TweenInfo.new(data.RespawnDuration or 1, Enum.EasingStyle.Linear), {
+		local TweenTO = TweenService:Create(part, data.TweenIn or TweenInfo.new(data.RespawnDuration or 1), {
 			Transparency = originalTransparency,
 			Position = origin,
 		})
@@ -947,10 +962,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			active = false
 
 			for bpart, bpartdata in pairs(data.Modify) do
-				local newTween =
-					TweenService:Create(bpart, bpartdata.Tween or TweenInfo.new(0, Enum.EasingStyle.Linear), {
-						Transparency = originalTransparency[bpart],
-					})
+				local newTween = TweenService:Create(bpart, bpartdata.TweenOut or TweenInfo.new(0.2), {
+					Transparency = originalTransparency[bpart],
+				})
 				bpart.CanCollide = not bpartdata.CanCollide
 
 				newTween:Play()
@@ -972,10 +986,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end
 
 				for bpart, bpartdata in pairs(data.Modify) do
-					local newTween =
-						TweenService:Create(bpart, bpartdata.Tween or TweenInfo.new(0, Enum.EasingStyle.Linear), {
-							Transparency = bpartdata.Transparency,
-						})
+					local newTween = TweenService:Create(bpart, bpartdata.TweenIn or TweenInfo.new(0.2), {
+						Transparency = bpartdata.Transparency,
+					})
 					bpart.CanCollide = bpartdata.CanCollide
 
 					newTween:Play()
@@ -1012,10 +1025,10 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	for i = 1, #SCLI_CONFIGS.Types.PartRespawner do
 		local part = SCLI_CONFIGS.Types.PartRespawner[i]
 		part.Touched:Connect(function(hit)
-			local cachedir = CLI_Cache.Temp.IsPushable[hit]
+			local dir = CLI_Cache.Temp.IsPushable[hit]
 
-			if cachedir then
-				hit.CFrame = CLI_Cache.Temp.IsPushable[part].CFrame
+			if dir then
+				hit.CFrame = dir.CFrame
 			end
 		end)
 	end
@@ -1072,12 +1085,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				if (part.Position - playerCharacter.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
 					continue
 				end
+				local dir = CLI_Cache.Temp.Spinner[part]
 
-				part.CFrame *= CFrame.Angles(
-					data.XAxis and math.rad(data.XAxis * dt) or 0,
-					data.YAxis and math.rad(data.YAxis * dt) or 0,
-					data.ZAxis and math.rad(data.ZAxis * dt) or 0
-				)
+				part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
@@ -1085,18 +1095,10 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 					continue
 				end
 
-				local cAngle = CLI_Cache.Temp.Orbitial[part]
+				local cAngle = CLI_Cache.Temp.Orbitial[part].curAngle
+				local orbitCFrame = CLI_Cache.Temp.Orbitial[part].orbitCFrame
 
 				cAngle += math.rad(data.Speed) * dt
-
-				local orbitRotation =
-					CFrame.Angles(math.rad(data.XTilt or 0), math.rad(data.YRotation or 0), math.rad(data.ZTilt or 0))
-				local offsetRotation = CFrame.Angles(
-					math.rad(data.TiltXOffset or 0),
-					math.rad(data.AngleYOffset or 0),
-					math.rad(data.TiltZOffset or 0)
-				)
-				local orbitCFrame = orbitRotation * offsetRotation
 				local off = orbitCFrame:VectorToWorldSpace(
 					Vector3.new(
 						math.cos(cAngle) * (data.OrbitalOffset or 0),
@@ -1116,7 +1118,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 					part.Position = pos
 				end
 
-				CLI_Cache.Temp.Orbitial[part] = cAngle
+				CLI_Cache.Temp.Orbitial[part].curAngle = cAngle
 			end
 
 			for groupName, groupData in pairs(SCLI_CONFIGS.Groups.BeatBlockGroup) do
@@ -1172,18 +1174,11 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 			if currentTouchedStandable and lastCf then
 				local currentCf = currentTouchedStandable.CFrame
-				local offset = playerCharacter.Position - lastCf.Position
 
-				local localX = offset:Dot(lastCf.XVector)
-				local localY = offset:Dot(lastCf.YVector)
-				local localZ = offset:Dot(lastCf.ZVector)
+				local relativePosition = lastCf:PointToObjectSpace(playerCharacter.Position)
+				local newPosition = currentCf:PointToWorldSpace(relativePosition)
 
-				local newPosition = currentCf.Position
-					+ currentCf.XVector * localX
-					+ currentCf.YVector * localY
-					+ currentCf.ZVector * localZ
-
-				playerCharacter.Position += newPosition - playerCharacter.Position
+				playerCharacter.Position = newPosition
 
 				lastCf = currentCf
 			end
