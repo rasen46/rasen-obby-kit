@@ -26,19 +26,18 @@ This kit current features:
 |Conveyor|Class|Pushes a player on any axis as long as the player touches the part|
 |Teleporter|Class|Teleports the player to a target position|
 |Damager|Class|Damages the player|
-|Fader|Class|Makes a part fade if touched
+|Fader|Class|Makes a part fade if touched|
+|Button|Class|Modifies a object's properties or runs a function after being triggered|
+|ButtonDeactivate|Class|Deactivates a button (does not work for now)|
 |Standable|Type|Makes a part able to hold players|
 |IsPushable|Type|Does not work for now|
 |PartReseter|Type|Does not work for now|
 |Instakill|Type|Instakills the player|
+|BeatBlockGroup|Group|Allows for cycling of part property changing|
 
 ## Road Map
 |-|Coming in 0.4.0|Waiting for Studio updates|
 |-|-|-|
-|Button (Class)|in progress|no|
-|ButtonDeactivate (Class)|in progress|no|
-|Beat Block Instance (Class)|in progress|no|
-|Beat Block Group (Class)|in progress|no|
 |PartRespawner (Type)|in progress|no|
 |LDM Mode (Config)|framework|no|
 |Quick Reset|yes|no|
