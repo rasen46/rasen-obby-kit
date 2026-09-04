@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.1 beta release
+version 0.3.2 beta release
 
 please dont strip credits from this
 ]]
@@ -30,14 +30,14 @@ local DCLI_CONFIGS = {
 	},
 	VALUES = { -- changes some configs with how stuff look and work
 		LegitMode = false, -- Toggles the ability to use All-jump Utilities
-		EnableQuickReset = false, -- Toggles the ability to Quick Reset (disabled for now due to problems with getting part properties)
+		EnableQuickReset = false, -- Toggles the ability to Quick Reset (disabled for now)
 		QRClearCheckpoints = false, -- Toggles if using Quick Reset will clear all-jump progress
 		RespawnAtLastCheckPoint = true, -- Toggles if dying will spawn you at your last checkpoint or at the default SpawnLocation
 		ActivePartDistance = 100, -- The maximum distance where spinners, orbital, and conveyors will remain active from the player (MIN: 50) (not inplemented yet)
 		QuickResetDuration = 2, -- The amount of time required to have the Quick Reset Key being held down to reset the game
 
-		AllJumpConfig = { -- configurations with how All-jump indicators look like (disabled for now due to CanCollide read/write restrictions)
-			ShowIndicators = false,
+		AllJumpConfig = { -- configurations with how All-jump indicators look like
+			ShowIndicators = true,
 			CentertoHRP = true,
 			Color3 = Color3.new(1, 1, 1),
 			Size = Vector3.new(0.25, 0.25, 0.25),
@@ -116,16 +116,6 @@ local SCLI_CONFIGS = {
 			]]
 		},
 
-		-- V ANYTHING BELOW THIS IS NOT EXPECTED TO WORK 100% OF THE TIME DUE TO STUDIO UPDATES BREAKING AND FIXING THINGS AND CHANGES TO PART PROPERTIES V
-		Damager = {
-			--[[
-			Example Damager
-			[Workspace.Killbrick] = { -- set the part you want to become a damager to the name of the part (this example shows a part named 'Killbrick')
-				Damage = 5, -- sets the amount of damage it will give to a player if they touch it
-			}
-			]]
-		},
-
 		Fader = {
 			--[[
 			Example Fader
@@ -141,6 +131,51 @@ local SCLI_CONFIGS = {
 			}
 			]]
 		},
+
+		PlayerProperty = {
+			--[[
+			[Workspace.BoostPart] = { -- sets the part you want to become a PlayerProperty part (this example shows a part named 'PlayerProperty')
+				Duration = 5 -- sets how long the effect lasts (optional, default 1)
+				Walkspeed = 16 -- adds this much walkspeed to the player (optional, default 0)
+				Jumppower = 40 -- adds this much jumppower to the player (optional, default 0)
+			}
+			]]
+		},
+
+		-- V ANYTHING BELOW THIS IS NOT EXPECTED TO WORK 100% OF THE TIME DUE TO STUDIO UPDATES BREAKING AND FIXING THINGS AND CHANGES TO PART PROPERTIES V
+		Damager = {
+			--[[
+			Example Damager
+			[Workspace.Killbrick] = { -- set the part you want to become a damager to the name of the part (this example shows a part named 'Killbrick')
+				Damage = 5, -- sets the amount of damage it will give to a player if they touch it
+			}
+			]]
+		},
+
+		Button = {
+			--[[
+			[Workspace.Button] = { -- set the part you want to become a button to the name of the part (this example shows a part named 'Button')
+				Duration = 1,               -- sets how long the button lasts, set to 0 for infinite (optional, default 1)
+				ActivateOnHumanoid = true,  -- sets if the button can be activated via players (optional, default true)
+				ActivateOnPart = false,     -- sets if the button can be activated via parts (optional, default false)
+				Modify = {                  -- sets what parts to modify if activated (optional)
+					[Workspace.Part] = {Transparency = 1, CanCollide = false}
+				}
+				OnActivate = function(part) end, -- runs a function when the button is activated (optional)
+				OnDeactivate = function(part) end, -- runs a function when the button is deactivated (optional)
+			}
+			]]
+		},
+
+		ButtonDeactivate = { -- does not work for now, ill fix next update
+			--[[
+			[Workspace.ButtonDeactivate] = {
+				ActivateOnHumanoid = true,  -- sets if the button can be activated via players (optional, default true)
+				ActivateOnPart = false,     -- sets if the button can be activated via parts (optional, default false)
+				ButtonToDeactivate = workspace.Button -- sets what button to deactivate (required)
+			}
+			]]
+		},
 	},
 
 	Types = {
@@ -148,6 +183,28 @@ local SCLI_CONFIGS = {
 		IsPushable = {}, -- this will give parts under this table to be repspawned from touching parts with "PartRespawner" type, format (ex: {workspace.Part2, workspace.Part})
 		PartRespawner = {}, -- this will respawn parts listed as "IsPushable", format (ex: {workspace.Part2, workspace.Part})
 		Instakill = {}, -- this will kill the player immediately if they touch it, format (ex: {workspace.Part2, workspace.Part})
+	},
+
+	Groups = {
+		BeatBlockGroup = { -- ill add size changing next update
+			--[[
+			["BBG1"] = { -- sets the name of the beat block group 
+				BeatInterval = 1, -- sets the interval between beats in seconds (required)
+				ActiveBeatBlocks = { -- parts under this class will be given these properties when active
+					[1] = {Transparency = 0, CanCollide = true, Tween = TweenInfo.new(...)},
+					[2] = {Transparency = 0, CanCollide = true, Tween = TweenInfo.new(...)}
+				},
+				InactiveBeatBlocks = { -- parts under this class will be given these properties when inactive
+					[1] = {Transparency = 0.5, CanCollide = false, Tween = TweenInfo.new(...)},
+					[2] = {Transparency = 0.5, CanCollide = false, Tween = TweenInfo.new(...)}
+				},
+				BeatBlocks = { -- sets what group a part should be in this group
+					[1] = {Workspace.BeatPart1, Workspace.BeatPart2},
+					[2] = {Workspace.BeatPart1, Workspace.BeatPart2}
+				}
+			}
+			]]
+		},
 	},
 
 	FFlagsEditor = { -- devtools, dont touch unless yk what ur doing
@@ -168,6 +225,7 @@ local CLI_Cache = {
 		Mover = {},
 		Conveyor = {},
 		IsPushable = {},
+		BeatBlockGroup = {},
 	},
 }
 
@@ -179,6 +237,10 @@ local holdingQR = false
 local heldQRTime = 0
 
 local playerAddedForce = Vector3.zero
+local playerWalkspeed = 16
+local playerJumppower = 50
+local playerAddedWalkspeed = 0
+local playerAddedJumppower = 0
 
 local currentTouchedStandable = nil
 local lastCf = nil
@@ -263,6 +325,30 @@ local CheckRules = {
 			AllowParts = "boolean",
 			AllowHumanoids = "boolean",
 			ConnectOnTrigger = "function",
+		},
+	},
+	PlayerProperty = {
+		Optional = {
+			Duration = "number",
+			Walkspeed = "number",
+			Jumppower = "number",
+		},
+	},
+	ButtonDeactivate = {
+		ButtonToDeactivate = "table",
+		Optional = {
+			ActivateOnHumanoid = "boolean",
+			ActivateOnPart = "boolean",
+		},
+	},
+	Button = {
+		Optional = {
+			Duration = "number",
+			ActivateOnHumanoid = "boolean",
+			ActivateOnPart = "boolean",
+			Modify = "table",
+			OnActivate = "function",
+			OnAOnDeactivatectivate = "function",
 		},
 	},
 	Standable = {
@@ -574,7 +660,9 @@ UIS.InputBegan:Connect(function(inp, pro)
 			if keyEvent == "SetCheckpoint" then
 				cCount += 1
 				local n = createAJPart()
-				n.Position = DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP and (playerCharacter.Position + Vector3.new(0,2.5,0)) or playerCharacter.Position
+				n.Position = DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP
+						and (playerCharacter.Position + Vector3.new(0, 2.5, 0))
+					or playerCharacter.Position
 				CheckpointParts[cCount] = n
 				Checkpoints[cCount] = playerCharacter.Position
 			elseif keyEvent == "GoToLatestCheckpoint" then
@@ -810,6 +898,112 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
+	for part, data in pairs(SCLI_CONFIGS.Classes.PlayerProperty) do
+		local active = false
+		part.Touched:Connect(function(hit)
+			if active then
+				return
+			end
+			local humanoid = hit.Parent and hit.Parent.Humanoid
+
+			if humanoid then
+				active = true
+
+				playerAddedWalkspeed += data.Walkspeed or 0
+				playerAddedJumppower += data.Jumppower or 0
+
+				task.delay(data.Duration or 1, function()
+					playerAddedWalkspeed -= data.Walkspeed or 0
+					playerAddedJumppower -= data.Jumppower or 0
+
+					active = false
+				end)
+			end
+		end)
+	end
+
+	for part, data in pairs(SCLI_CONFIGS.Classes.Button) do
+		local active = false
+
+		local originalTransparency = {}
+		local breakDelay = false
+		for part1 in pairs(data.Modify) do
+			originalTransparency[part1] = part1.Transparency
+		end
+
+		local function deactivate()
+			if breakDelay then
+				breakDelay = false
+				return
+			end
+			if not active then
+				return
+			end
+
+			if data.OnDeactivate then
+				data.OnDeactivate(part)
+			end
+
+			active = false
+
+			for bpart, bpartdata in pairs(data.Modify) do
+				local newTween =
+					TweenService:Create(bpart, bpartdata.Tween or TweenInfo.new(0, Enum.EasingStyle.Linear), {
+						Transparency = originalTransparency[bpart],
+					})
+				bpart.CanCollide = not bpartdata.CanCollide
+
+				newTween:Play()
+			end
+		end
+
+		part.Touched:Connect(function(hit)
+			local humanoid = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
+
+			if (data.ActivateOnHumanoid ~= false and humanoid) or data.ActivateOnPart then
+				if active then
+					return
+				end
+
+				active = true
+
+				if data.OnActivate then
+					data.OnActivate(part)
+				end
+
+				for bpart, bpartdata in pairs(data.Modify) do
+					local newTween =
+						TweenService:Create(bpart, bpartdata.Tween or TweenInfo.new(0, Enum.EasingStyle.Linear), {
+							Transparency = bpartdata.Transparency,
+						})
+					bpart.CanCollide = bpartdata.CanCollide
+
+					newTween:Play()
+				end
+
+				if data.Duration and data.Duration > 0 then
+					task.delay(data.Duration, deactivate)
+				end
+			end
+		end)
+
+		for dpart, ddata in pairs(SCLI_CONFIGS.Classes.ButtonDeactivate) do
+			if ddata.ButtonToDeactivate == part then
+				dpart.Touched:Connect(function(hit)
+					local humanoid = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
+
+					local shouldDeactivate = (ddata.ActivateOnHumanoid ~= false and humanoid ~= nil)
+						or (ddata.ActivateOnPart and hit:IsA("BasePart"))
+
+					if shouldDeactivate and active then
+						breakDelay = true
+						deactivate()
+					end
+				end)
+			end
+		end
+	end
+
 	for i = 1, #SCLI_CONFIGS.Types.IsPushable do
 		local part = SCLI_CONFIGS.Types.IsPushable[i]
 		CLI_Cache.Temp.IsPushable[part] = { CFrame = part.CFrame }
@@ -834,6 +1028,23 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				rOK_PlayerEvent:FireServer("damage", humanoid.Health)
 			end
 		end)
+	end
+
+	local function applyBeatProperties(parts, properties)
+		for _, part in ipairs(parts) do
+			local tweenInfo = properties.Tween
+
+			if tweenInfo then
+				local tweenProperties = table.clone(properties)
+				tweenProperties.Tween = nil
+
+				TweenService:Create(part, tweenInfo, tweenProperties):Play()
+			else
+				for property, value in pairs(properties) do
+					part[property] = value
+				end
+			end
+		end
 	end
 
 	-- thread
@@ -908,6 +1119,34 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				CLI_Cache.Temp.Orbitial[part] = cAngle
 			end
 
+			for groupName, groupData in pairs(SCLI_CONFIGS.Groups.BeatBlockGroup) do
+				local dir = CLI_Cache.Temp.BeatBlockGroup[groupName]
+
+				if not dir then
+					CLI_Cache.Temp.BeatBlockGroup[groupName] = {
+						Elapsed = 0,
+						Index = 1,
+					}
+					dir = CLI_Cache.Temp.BeatBlockGroup[groupName]
+				end
+
+				dir.Elapsed += dt
+
+				if dir.Elapsed >= groupData.BeatInterval then
+					dir.Elapsed -= groupData.BeatInterval
+					dir.Index += 1
+
+					if dir.Index > #groupData.BeatBlocks then
+						dir.Index = 1
+					end
+
+					for index, parts in pairs(groupData.BeatBlocks) do
+						applyBeatProperties(parts, groupData.InactiveBeatBlocks[index])
+					end
+					applyBeatProperties(groupData.BeatBlocks[dir.Index], groupData.ActiveBeatBlocks[dir.Index])
+				end
+			end
+
 			for part in pairs(CLI_Cache.Temp.Conveyor) do
 				local data = SCLI_CONFIGS.Classes.Conveyor[part]
 
@@ -918,7 +1157,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end
 			end
 
-			local result = raycast(playerCharacter.Position + Vector3.new(0,3,0), Vector3.new(0, -3, 0), {})
+			local result = raycast(playerCharacter.Position + Vector3.new(0, 3, 0), Vector3.new(0, -3, 0), {})
 
 			if result and result.normal.Y > 0.5 then
 				local standable = result.part
@@ -948,6 +1187,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 				lastCf = currentCf
 			end
+
+			playerCharacter.Humanoid.WalkSpeed = playerWalkspeed + playerAddedWalkspeed
+			playerCharacter.Humanoid.JumpPower = playerJumppower + playerAddedJumppower
 		end, function(err)
 			return tostring(err)
 		end)
