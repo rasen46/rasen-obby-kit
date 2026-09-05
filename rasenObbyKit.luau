@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.3 beta release
+version 0.3.4 beta release
 
 please dont strip credits from this
 ]]
@@ -522,119 +522,55 @@ end
 
 local function raycastPart(pos, rayDir, maxDist, part)
 	local cf = part.CFrame
-	local half = part.Size * 0.5
-
-	-- move the ray into the parts local space so rotated parts work fine too
-	local localPos = cf:PointToObjectSpace(pos)
-	local localDir = cf:VectorToObjectSpace(rayDir)
-
-	local minB = -half
-	local maxB = half
-
-	local tMin = -math.huge
-	local tMax = math.huge
-	local normal = Vector3.new(0, 0, 0) -- please make Vector3.zero halo
-
-	-- X axis
-	if localDir.X ~= 0 then
-		local t1 = (minB.X - localPos.X) / localDir.X
-		local t2 = (maxB.X - localPos.X) / localDir.X
-
-		local sign = 1
-		if t1 > t2 then
-			t1, t2 = t2, t1
-			sign = -1
+	local half = part.Size / 2
+	local normal = Vector3.new()
+	local localPos, localDir = cf:PointToObjectSpace(pos), cf:VectorToObjectSpace(rayDir)
+	local minB, maxB = -half, half
+	local tMin, tMax = -math.huge, math.huge
+	for i = 1, 3 do
+		local direction = (i == 1 and "X") or (i == 2 and "Y") or "Z"
+		if localDir[direction] ~= 0 then
+			local t1 = (minB[direction] - localPos[direction]) / localDir[direction]
+			local t2 = (maxB[direction] - localPos[direction]) / localDir[direction]
+			local sign = 1
+			if t1 > t2 then
+				t1, t2 = t2, t1
+				sign = -1
+			end
+			if t1 > tMin then
+				tMin = t1
+				normal = Vector3.new(
+					direction == "X" and -sign or 0,
+					direction == "Y" and -sign or 0,
+					direction == "Z" and -sign or 0
+				)
+			end
+			if t2 < tMax then
+				tMax = t2
+			end
+		elseif localPos[direction] < minB[direction] or localPos[direction] > maxB[direction] then
+			return nil
 		end
-
-		if t1 > tMin then
-			tMin = t1
-			normal = Vector3.new(-sign, 0, 0)
-		end
-
-		if t2 < tMax then
-			tMax = t2
-		end
-	elseif localPos.X < minB.X or localPos.X > maxB.X then
-		return nil
 	end
-
-	-- Y axis
-	if localDir.Y ~= 0 then
-		local t1 = (minB.Y - localPos.Y) / localDir.Y
-		local t2 = (maxB.Y - localPos.Y) / localDir.Y
-
-		local sign = 1
-		if t1 > t2 then
-			t1, t2 = t2, t1
-			sign = -1
-		end
-
-		if t1 > tMin then
-			tMin = t1
-			normal = Vector3.new(0, -sign, 0)
-		end
-
-		if t2 < tMax then
-			tMax = t2
-		end
-	elseif localPos.Y < minB.Y or localPos.Y > maxB.Y then
-		return nil
-	end
-
-	-- Z axis
-	if localDir.Z ~= 0 then
-		local t1 = (minB.Z - localPos.Z) / localDir.Z
-		local t2 = (maxB.Z - localPos.Z) / localDir.Z
-
-		local sign = 1
-		if t1 > t2 then
-			t1, t2 = t2, t1
-			sign = -1
-		end
-
-		if t1 > tMin then
-			tMin = t1
-			normal = Vector3.new(0, 0, -sign)
-		end
-
-		if t2 < tMax then
-			tMax = t2
-		end
-	elseif localPos.Z < minB.Z or localPos.Z > maxB.Z then
-		return nil
-	end
-
 	if tMin > tMax or tMin < 0 or tMin > maxDist then
 		return nil
 	end
-
-	return {
-		part = part,
-		position = pos + rayDir * tMin,
-		normal = cf:VectorToWorldSpace(normal),
-		distance = tMin,
-	}
+	return { part = part, position = pos + rayDir * tMin, normal = cf:VectorToWorldSpace(normal), distance = tMin }
 end
-
 local function raycast(pos, dir, blocked)
 	blocked = blocked or {}
-
-	if allParts == nil or blockedListChanged(blocked) then
+	if not allParts or blockedListChanged(blocked) then
 		buildPartsList(blocked)
 	end
-
 	local maxDist = math.sqrt(dir.X ^ 2 + dir.Y ^ 2 + dir.Z ^ 2)
 	local rayDir = Vector3.new(dir.X / maxDist, dir.Y / maxDist, dir.Z / maxDist)
-
 	local closest = nil
-
 	for _, part in pairs(allParts) do
 		local result = raycastPart(pos, rayDir, maxDist, part)
 		if result and (not closest or result.distance < closest.distance) then
 			closest = result
 		end
 	end
-
 	return closest
 end
 
@@ -1061,8 +997,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	end
 
 	-- thread
-	while true do
-		local dt = RunService.Heartbeat:Wait()
+	RunService.Heartbeat:Connect(function(dt)
 		local playerCharacter = player.Character
 		elapsed += dt
 
@@ -1079,6 +1014,19 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end
 			else
 				heldQRTime = 0
+			end
+
+			local result = raycast(playerCharacter.Position + Vector3.new(0, 2, 0), Vector3.new(0, -2.25, 0), {})
+
+			if result and result.normal.Y > 0.5 then
+				local standable = result.part
+				if currentTouchedStandable ~= standable then
+					currentTouchedStandable = standable
+					lastCf = standable.CFrame
+				end
+			else
+				currentTouchedStandable = nil
+				lastCf = nil
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
@@ -1153,33 +1101,21 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				local data = SCLI_CONFIGS.Classes.Conveyor[part]
 
 				if data.BasedOnRotation then
-					playerCharacter.Position += part.CFrame.LookVector * (data.BaseSpeed or 0) * dt
+					playerCharacter:PivotTo(
+						playerCharacter:GetPivot() + (part.CFrame.LookVector * (data.BaseSpeed or 0) * dt)
+					)
 				else
-					playerCharacter.Position += Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
+					playerCharacter:PivotTo(
+						playerCharacter:GetPivot() + Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
+					)
 				end
-			end
-
-			local result = raycast(playerCharacter.Position + Vector3.new(0, 3, 0), Vector3.new(0, -3, 0), {})
-
-			if result and result.normal.Y > 0.5 then
-				local standable = result.part
-				if currentTouchedStandable ~= standable then
-					currentTouchedStandable = standable
-					lastCf = standable.CFrame
-				end
-			else
-				currentTouchedStandable = nil
-				lastCf = nil
 			end
 
 			if currentTouchedStandable and lastCf then
 				local currentCf = currentTouchedStandable.CFrame
+				local delta = currentCf * lastCf:Inverse()
 
-				local relativePosition = lastCf:PointToObjectSpace(playerCharacter.Position)
-				local newPosition = currentCf:PointToWorldSpace(relativePosition)
-
-				playerCharacter.Position = newPosition
-
+				playerCharacter:PivotTo(delta * playerCharacter:GetPivot())
 				lastCf = currentCf
 			end
 
@@ -1192,5 +1128,5 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		if not ok then
 			LOGF("WARN", tostring(result))
 		end
-	end
+	end)
 end)
