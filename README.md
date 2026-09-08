@@ -3,8 +3,12 @@ a client-side object handler for a game named "Vortex"
 
 ## Installation
 1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases` OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenObbyKit.luau`
-2. Create a new `LocalScript` under `StarterPlayerScripts` (this script can be named whatever you want it to be)
-3. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
+2. Get the `rasenServerSide.luau` file from `github.com/rasen46/rasen-obby-kit/releases` as well, OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenServerSide.luau`
+3. Create a new `LocalScript` under `StarterPlayerScripts` (this script can be named whatever you want it to be)
+4. Create a new `Script` under `ServerScriptService` (this script can be also named whatever you want it to be)
+5. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
+6.  Paste the contents of `rasenServerSide.luau` into the `Script` you just created
+7.  And you're done; you can edit CO inside the `LocalScript` you just made under `SCLI_CONFIGS`
 
 ## Updating or downgrading the kit
 You can simply transfer the `SCLI_CONFIGS` from your current kit to the one you want to use
@@ -29,9 +33,10 @@ This kit current features:
 |Fader|Class|Makes a part fade if touched|
 |Button|Class|Modifies a object's properties or runs a function after being triggered|
 |ButtonDeactivate|Class|Deactivates a button (does not work for now)|
+|PlayerProperties|Class|Changes the properties of the player for an amount of time|
 |Standable|Type|Makes a part able to hold players|
 |Instakill|Type|Instakills the player|
-|BeatBlockGroup|Group|Allows for cycling of part property changing|
+|BeatBlockGroup|Group|Allows for cycling of part property changes|
 
 ## Road Map
 |-|Coming in 0.4.0|Waiting for Studio updates|
