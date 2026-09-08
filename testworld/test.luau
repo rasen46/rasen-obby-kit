@@ -1303,7 +1303,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				local currentCf = currentTouchedStandable.CFrame
 				local delta = currentCf * lastCf:Inverse()
 
-				charPivot = playerCharacter:PivotTo(delta * charPivot)
+				playerCharacter:PivotTo(delta * charPivot)
 				charPivot *= delta
 				lastCf = currentCf
 			end
