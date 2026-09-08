@@ -15,7 +15,7 @@ You can simply transfer the `SCLI_CONFIGS` from your current kit to the one you 
 
 or in a somewhat more detailed explaination...
 
-The way I would recommend to update/downgrade your kit is by first getting the kit you want, then deleting the `SCLI_CONFIGS` table from it and replacing it with the `SCLI_CONFIGS` from the current kit you were using (the "old" one)
+The way I would recommend to update/downgrade your kit is by first getting the kit you want, then deleting the `SCLI_CONFIGS` table from the kit you just got from it and replacing it with the `SCLI_CONFIGS` from the old kit you were using
 
 ## Documentation
 Most of the documentation is already shown inside the `rasenObbyKit.luau` file as comments
