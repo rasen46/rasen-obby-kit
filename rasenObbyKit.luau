@@ -1154,10 +1154,12 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 				if data.BasedOnRotation then
 					local movement = part.CFrame.LookVector * (data.BaseSpeed or 0) * dt
-					charPivot = playerCharacter:PivotTo(charPivot + movement)
+					playerCharacter:PivotTo(charPivot + movement)
+					charPivot += movement
 				else
 					local movement = Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
-					charPivot = playerCharacter:PivotTo(charPivot + movement)
+					playerCharacter:PivotTo(charPivot + movement)
+					charPivot += movement
 				end
 			end
 
@@ -1165,7 +1167,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				local currentCf = currentTouchedStandable.CFrame
 				local delta = currentCf * lastCf:Inverse()
 
-				charPivot = playerCharacter:PivotTo(delta * charPivot)
+				playerCharacter:PivotTo(delta * charPivot)
+				charPivot *= delta
 				lastCf = currentCf
 			end
 
