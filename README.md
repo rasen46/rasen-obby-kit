@@ -30,16 +30,15 @@ This kit current features:
 |Button|Class|Modifies a object's properties or runs a function after being triggered|
 |ButtonDeactivate|Class|Deactivates a button (does not work for now)|
 |Standable|Type|Makes a part able to hold players|
-|IsPushable|Type|Does not work for now|
-|PartReseter|Type|Does not work for now|
 |Instakill|Type|Instakills the player|
 |BeatBlockGroup|Group|Allows for cycling of part property changing|
 
 ## Road Map
 |-|Coming in 0.4.0|Waiting for Studio updates|
 |-|-|-|
-|PartRespawner (Type)|in progress|no|
+|PartRespawner (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
+|IsPushable (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
+|PartReseter (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
 |LDM Mode (Config)|framework|no|
 |Quick Reset|yes|no|
 |Multi-Obby loading|yes|no|
-|Improved Rotation Calculations|no|yes (waiting for better Vector Handling)|
