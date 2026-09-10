@@ -1082,43 +1082,39 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-				if (part.Position - charPivot.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
-					continue
+				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
+					local dir = CLI_Cache.Temp.Spinner[part]
+					part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 				end
-				local dir = CLI_Cache.Temp.Spinner[part]
-
-				part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-				if (part.Position - charPivot.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
-					continue
-				end
+				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
+					local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
+					local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
 
-				local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
-				local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
-
-				cAngle += math.rad(data.Speed) * dt
-				local off = orbitCFrame:VectorToWorldSpace(
-					Vector3.new(
-						math.cos(cAngle) * (data.OrbitalOffset or 0),
-						0,
-						math.sin(cAngle) * (data.OrbitalOffset or 0)
+					cAngle += math.rad(data.Speed) * dt
+					local off = orbitCFrame:VectorToWorldSpace(
+						Vector3.new(
+							math.cos(cAngle) * (data.OrbitalOffset or 0),
+							0,
+							math.sin(cAngle) * (data.OrbitalOffset or 0)
+						)
 					)
-				)
 
-				local pos = (
-					SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
-					or data.OrbitalOrigin
-				) + off
+					local pos = (
+						SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
+						or data.OrbitalOrigin
+					) + off
 
-				if data.OrbitalFaceCenter then
-					part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
-				else
-					part.Position = pos
+					if data.OrbitalFaceCenter then
+						part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
+					else
+						part.Position = pos
+					end
+
+					CLI_Cache.Temp.Orbital[part].curAngle = cAngle
 				end
-
-				CLI_Cache.Temp.Orbital[part].curAngle = cAngle
 			end
 
 			for groupName, groupData in pairs(SCLI_CONFIGS.Groups.BeatBlockGroup) do
