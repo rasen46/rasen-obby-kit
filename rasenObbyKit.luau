@@ -47,6 +47,10 @@ local DCLI_CONFIGS = {
 
 -- the obby kit (practically) (dont change this if ur playing the obby, as it could modify gameplay)
 local SCLI_CONFIGS = {
+	Player = {
+		Walkspeed = 16,
+		JumpPower = 50,
+	},
 	Classes = {
 		Spinner = {
 			--[[
@@ -243,8 +247,8 @@ local holdingQR = false
 local heldQRTime = 0
 
 local playerAddedForce = Vector3.zero
-local playerWalkspeed = 16
-local playerJumppower = 50
+local playerWalkspeed = SCLI_CONFIGS.Player and SCLI_CONFIGS.Player.Walkspeed or 16
+local playerJumppower = SCLI_CONFIGS.Player and SCLI_CONFIGS.Player.JumpPower or 50
 local playerAddedWalkspeed = 0
 local playerAddedJumppower = 0
 
@@ -256,7 +260,7 @@ local elapsed = 0
 local player = Players.LocalPlayer
 local spawnLocation = Workspace:FindFirstChild("SpawnLocation")
 
-local rOK_PlayerEvent = ReplicatedStorage:WaitForChild("rOK_PlayerEvent") -- for obby loading from server -> client
+local rOK_PlayerEvent = ReplicatedStorage:WaitForChild("rOK_PlayerEvent", 2) -- for obby loading from server -> client
 
 local function LOGF(LType, log)
 	if SCLI_CONFIGS.FFlagsEditor.DFFlagExportTextToOutput then
@@ -407,7 +411,10 @@ local function ValidateClass(className, object, data, rules)
 			local value = data[propertyName]
 
 			if value == nil then
-				LOGF("warn", `[{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`)
+				LOGF(
+					"warn",
+					`[{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`
+				)
 				return false
 			end
 
@@ -653,6 +660,10 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	local playerCharacter = player.Character
 	local charPivot = playerCharacter:GetPivot() :: CFrame
 
+	if not rOK_PlayerEvent then
+		LOGF("WARN", "Damage bricks will not work due to the server-side not being installed!")
+	end
+
 	if SCLI_CONFIGS.FFlagsEditor.FFlagEnableTypeCheckerExperiment then
 		for containerClass, containerObjects in pairs(SCLI_CONFIGS) do
 			if containerClass ~= "Classes" and containerClass ~= "Types" then
@@ -794,17 +805,32 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Damager) do
-		part.Touched:Connect(function(hit)
-			local humanoid = hit
-				and hit._id
-				and hit._id == playerCharacter._id
-				and playerCharacter:FindFirstChildOfClass("Humanoid")
+	if rOK_PlayerEvent then
+		for part, data in pairs(SCLI_CONFIGS.Classes.Damager) do
+			part.Touched:Connect(function(hit)
+				local humanoid = hit
+					and hit._id
+					and hit._id == playerCharacter._id
+					and playerCharacter:FindFirstChildOfClass("Humanoid")
 
-			if humanoid then
-				rOK_PlayerEvent:FireServer("damage", data.Damage)
-			end
-		end)
+				if humanoid then
+					rOK_PlayerEvent:FireServer("damage", data.Damage)
+				end
+			end)
+		end
+
+		for i = 1, #SCLI_CONFIGS.Types.Instakill do
+			local part = SCLI_CONFIGS.Types.Instakill[i]
+			part.Touched:Connect(function(hit)
+				local humanoid = hit
+					and hit._id
+					and hit._id == playerCharacter._id
+					and playerCharacter:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					rOK_PlayerEvent:FireServer("damage", humanoid.Health)
+				end
+			end)
+		end
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Fader) do
@@ -1013,19 +1039,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 			if dir then
 				hit.CFrame = dir.CFrame
-			end
-		end)
-	end
-
-	for i = 1, #SCLI_CONFIGS.Types.Instakill do
-		local part = SCLI_CONFIGS.Types.Instakill[i]
-		part.Touched:Connect(function(hit)
-			local humanoid = hit
-				and hit._id
-				and hit._id == playerCharacter._id
-				and playerCharacter:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				rOK_PlayerEvent:FireServer("damage", humanoid.Health)
 			end
 		end)
 	end

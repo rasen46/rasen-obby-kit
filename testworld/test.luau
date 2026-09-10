@@ -47,6 +47,10 @@ local DCLI_CONFIGS = {
 
 -- the obby kit (practically) (dont change this if ur playing the obby, as it could modify gameplay)
 local SCLI_CONFIGS = {
+	Player = {
+		Walkspeed = 16,
+		JumpPower = 50,
+	},
 	Classes = {
 		Spinner = {
 			[Workspace.SpinnerXYZ] = {
@@ -377,8 +381,8 @@ local holdingQR = false
 local heldQRTime = 0
 
 local playerAddedForce = Vector3.zero
-local playerWalkspeed = 16
-local playerJumppower = 50
+local playerWalkspeed = SCLI_CONFIGS.Player.Walkspeed
+local playerJumppower = SCLI_CONFIGS.Player.JumpPower
 local playerAddedWalkspeed = 0
 local playerAddedJumppower = 0
 
@@ -390,7 +394,7 @@ local elapsed = 0
 local player = Players.LocalPlayer
 local spawnLocation = Workspace:FindFirstChild("SpawnLocation")
 
-local rOK_PlayerEvent = ReplicatedStorage:WaitForChild("rOK_PlayerEvent") -- for obby loading from server -> client
+local rOK_PlayerEvent = ReplicatedStorage:WaitForChild("rOK_PlayerEvent", 2) -- for obby loading from server -> client
 
 local function LOGF(LType, log)
 	if SCLI_CONFIGS.FFlagsEditor.DFFlagExportTextToOutput then
@@ -466,6 +470,7 @@ local CheckRules = {
 			AllowPlayer = "boolean",
 			ConnectOnTrigger = "function",
 			TargetPosition = "table",
+			TweenInfo = "table",
 			TweenOut = "table",
 			TweenIn = "table",
 		},
@@ -789,6 +794,10 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	local playerCharacter = player.Character
 	local charPivot = playerCharacter:GetPivot() :: CFrame
 
+	if not rOK_PlayerEvent then
+		LOGF("WARN", "Damage bricks will not work due to the server-side not being installed!")
+	end
+
 	if SCLI_CONFIGS.FFlagsEditor.FFlagEnableTypeCheckerExperiment then
 		for containerClass, containerObjects in pairs(SCLI_CONFIGS) do
 			if containerClass ~= "Classes" and containerClass ~= "Types" then
@@ -930,17 +939,32 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Damager) do
-		part.Touched:Connect(function(hit)
-			local humanoid = hit
-				and hit._id
-				and hit._id == playerCharacter._id
-				and playerCharacter:FindFirstChildOfClass("Humanoid")
+	if rOK_PlayerEvent then
+		for part, data in pairs(SCLI_CONFIGS.Classes.Damager) do
+			part.Touched:Connect(function(hit)
+				local humanoid = hit
+					and hit._id
+					and hit._id == playerCharacter._id
+					and playerCharacter:FindFirstChildOfClass("Humanoid")
 
-			if humanoid then
-				rOK_PlayerEvent:FireServer("damage", data.Damage)
-			end
-		end)
+				if humanoid then
+					rOK_PlayerEvent:FireServer("damage", data.Damage)
+				end
+			end)
+		end
+
+		for i = 1, #SCLI_CONFIGS.Types.Instakill do
+			local part = SCLI_CONFIGS.Types.Instakill[i]
+			part.Touched:Connect(function(hit)
+				local humanoid = hit
+					and hit._id
+					and hit._id == playerCharacter._id
+					and playerCharacter:FindFirstChildOfClass("Humanoid")
+				if humanoid then
+					rOK_PlayerEvent:FireServer("damage", humanoid.Health)
+				end
+			end)
+		end
 	end
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Fader) do
@@ -1153,19 +1177,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for i = 1, #SCLI_CONFIGS.Types.Instakill do
-		local part = SCLI_CONFIGS.Types.Instakill[i]
-		part.Touched:Connect(function(hit)
-			local humanoid = hit
-				and hit._id
-				and hit._id == playerCharacter._id
-				and playerCharacter:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				rOK_PlayerEvent:FireServer("damage", humanoid.Health)
-			end
-		end)
-	end
-
 	local function applyBeatProperties(parts, properties)
 		for _, part in ipairs(parts) do
 			local tweenInfo = properties.TweenInfo
@@ -1218,43 +1229,39 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-				if (part.Position - charPivot.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
-					continue
+				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
+					local dir = CLI_Cache.Temp.Spinner[part]
+					part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 				end
-				local dir = CLI_Cache.Temp.Spinner[part]
-
-				part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 			end
 
 			for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-				if (part.Position - charPivot.Position).Magnitude > DCLI_CONFIGS.VALUES.ActivePartDistance then
-					continue
-				end
+				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
+					local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
+					local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
 
-				local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
-				local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
-
-				cAngle += math.rad(data.Speed) * dt
-				local off = orbitCFrame:VectorToWorldSpace(
-					Vector3.new(
-						math.cos(cAngle) * (data.OrbitalOffset or 0),
-						0,
-						math.sin(cAngle) * (data.OrbitalOffset or 0)
+					cAngle += math.rad(data.Speed) * dt
+					local off = orbitCFrame:VectorToWorldSpace(
+						Vector3.new(
+							math.cos(cAngle) * (data.OrbitalOffset or 0),
+							0,
+							math.sin(cAngle) * (data.OrbitalOffset or 0)
+						)
 					)
-				)
 
-				local pos = (
-					SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
-					or data.OrbitalOrigin
-				) + off
+					local pos = (
+						SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
+						or data.OrbitalOrigin
+					) + off
 
-				if data.OrbitalFaceCenter then
-					part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
-				else
-					part.Position = pos
+					if data.OrbitalFaceCenter then
+						part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
+					else
+						part.Position = pos
+					end
+
+					CLI_Cache.Temp.Orbital[part].curAngle = cAngle
 				end
-
-				CLI_Cache.Temp.Orbital[part].curAngle = cAngle
 			end
 
 			for groupName, groupData in pairs(SCLI_CONFIGS.Groups.BeatBlockGroup) do
