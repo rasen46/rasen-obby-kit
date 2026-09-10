@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.5 beta release
+version 0.3.7 dev release
 
 please dont strip credits from this
 ]]
@@ -515,8 +515,11 @@ end
 
 local function buildPartsList(blocked)
 	local blockedSet = {}
-	for _, p in pairs(blocked) do
-		blockedSet[p._id] = true
+	for i = 1, #blocked do
+		local p = blocked[i]
+		if not lastBlockedSet[p._id] then
+			return true
+		end
 	end
 
 	allParts = {}
@@ -578,10 +581,11 @@ local function raycast(pos, dir, blocked)
 	if not allParts or blockedListChanged(blocked) then
 		buildPartsList(blocked)
 	end
-	local maxDist = math.sqrt(dir.X ^ 2 + dir.Y ^ 2 + dir.Z ^ 2)
+	local maxDist = math.sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z)
 	local rayDir = Vector3.new(dir.X / maxDist, dir.Y / maxDist, dir.Z / maxDist)
 	local closest = nil
-	for _, part in pairs(allParts) do
+	for i = 1, #allParts do
+		local part = allParts[i]
 		local result = raycastPart(pos, rayDir, maxDist, part)
 		if result and (not closest or result.distance < closest.distance) then
 			closest = result
@@ -660,6 +664,17 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	local playerCharacter = player.Character
 	local charPivot = playerCharacter:GetPivot() :: CFrame
 
+	local Values = DCLI_CONFIGS.VALUES
+	local Classes = SCLI_CONFIGS.Classes
+	local Temp = CLI_Cache.Temp
+
+	local ad = Values.ActivePartDistance
+	local adsq = ad * ad
+
+	local Spinner = Classes.Spinner
+	local Orbital = Classes.Orbital
+	local Conveyor = Classes.Conveyor
+
 	if not rOK_PlayerEvent then
 		LOGF("WARN", "Damage bricks will not work due to the server-side not being installed!")
 	end
@@ -722,7 +737,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
+	for part, data in pairs(Spinner) do
 		part.Rotation *= Vector3.new(
 			data.AngleXOffset and math.rad(data.AngleXOffset) or 0,
 			data.AngleYOffset and math.rad(data.AngleYOffset) or 0,
@@ -757,23 +772,21 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-		local orbitRotation =
-			CFrame.Angles(math.rad(data.XTilt or 0), math.rad(data.YRotation or 0), math.rad(data.ZTilt or 0))
-		local offsetRotation = CFrame.Angles(
-			math.rad(data.TiltXOffset or 0),
-			math.rad(data.AngleYOffset or 0),
-			math.rad(data.TiltZOffset or 0)
-		)
-		local orbitCFrame = orbitRotation * offsetRotation
+	for part, data in pairs(Orbital) do
+		local origin = data.OrbitalOrigin
+		local originPosition = origin.Position
 
 		CLI_Cache.Temp.Orbital[part] = {
-			curAngle = 0,
-			orbitCFrame = orbitCFrame,
+			Angle = 0,
+			Speed = math.rad(data.Speed or 0),
+			Offset = data.OrbitalOffset or 0,
+			Origin = origin,
+			OrbitCFrame = orbitCFrame,
+			FaceCenter = data.OrbitalFaceCenter == true,
 		}
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Conveyor) do
+	for part, data in pairs(Conveyor) do
 		part.Touched:Connect(function(hit)
 			if hit and hit._id and hit._id == playerCharacter._id then
 				CLI_Cache.Temp.Conveyor[part] = true
@@ -1094,39 +1107,25 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				lastCf = nil
 			end
 
-			for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
+			for part, data in pairs(Spinner) do
 				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
 					local dir = CLI_Cache.Temp.Spinner[part]
 					part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
 				end
 			end
 
-			for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
+			for part, data in pairs(Orbital) do
 				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
-					local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
-					local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
+					local dir = Temp.Orbital[part]
 
-					cAngle += math.rad(data.Speed) * dt
-					local off = orbitCFrame:VectorToWorldSpace(
-						Vector3.new(
-							math.cos(cAngle) * (data.OrbitalOffset or 0),
-							0,
-							math.sin(cAngle) * (data.OrbitalOffset or 0)
-						)
+					dir.Angle += dir.Speed * dt
+
+					local angle = dir.Angle
+					local offset = dir.OrbitCFrame:VectorToWorldSpace(
+						Vector3.new(math.cos(angle) * dir.Offset, 0, math.sin(angle) * dir.Offset)
 					)
 
-					local pos = (
-						SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
-						or data.OrbitalOrigin
-					) + off
-
-					if data.OrbitalFaceCenter then
-						part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
-					else
-						part.Position = pos
-					end
-
-					CLI_Cache.Temp.Orbital[part].curAngle = cAngle
+					local position = dir.Origin.Position + offset
 				end
 			end
 
