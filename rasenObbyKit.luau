@@ -727,7 +727,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 						continue
 					end
 
-					for _, object in ipairs(classChildren) do
+					for i = 1, #classChildren do
+						local object = classChildren[i]
 						if rules.FunctionCheck and not rules.FunctionCheck(object) then
 							LOGF("warn", `[{className}] [{object.Name}]: object failed FunctionCheck`)
 						end
@@ -1057,8 +1058,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	end
 
 	local function applyBeatProperties(parts, properties)
-		for _, part in ipairs(parts) do
+		for i = 1, #parts do
 			local tweenInfo = properties.TweenInfo
+			local part = parts[i]
 
 			if tweenInfo then
 				local tweenProperties = table.clone(properties)
