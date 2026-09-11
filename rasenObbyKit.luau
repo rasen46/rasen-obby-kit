@@ -42,6 +42,8 @@ local DCLI_CONFIGS = {
 			Color3 = Color3.new(1, 1, 1),
 			Size = Vector3.new(0.25, 0.25, 0.25),
 		},
+
+		DisableObbyKit = false, -- disables whenever the obby kit should calculate client side objects (all jump isnt effected)
 	},
 }
 
@@ -660,6 +662,8 @@ end)
 
 -- Main Thread
 task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](function()
+	if DCLI_CONFIGS.DisableObbyKit then return end
+
 	-- boot
 	local playerCharacter = player.Character
 	local charPivot = playerCharacter:GetPivot() :: CFrame
