@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.5 beta release
+version 0.3.7 beta release
 
 please dont strip credits from this
 ]]
@@ -360,7 +360,6 @@ local SCLI_CONFIGS = {
 }
 
 -- i wouldn't interact with anything past this!!!
-
 local CLI_Cache = {
 	Map = {},
 	Temp = {
@@ -381,8 +380,8 @@ local holdingQR = false
 local heldQRTime = 0
 
 local playerAddedForce = Vector3.zero
-local playerWalkspeed = SCLI_CONFIGS.Player.Walkspeed
-local playerJumppower = SCLI_CONFIGS.Player.JumpPower
+local playerWalkspeed = SCLI_CONFIGS.Player and SCLI_CONFIGS.Player.Walkspeed or 16
+local playerJumppower = SCLI_CONFIGS.Player and SCLI_CONFIGS.Player.JumpPower or 50
 local playerAddedWalkspeed = 0
 local playerAddedJumppower = 0
 
@@ -393,6 +392,11 @@ local elapsed = 0
 
 local player = Players.LocalPlayer
 local spawnLocation = Workspace:FindFirstChild("SpawnLocation")
+
+if not spawnLocation then
+	print("[WARN Could not find any part named SpawnLocation, defaulting to 0, 0, 0")
+	spawnLocation = { CFrame = CFrame.new(0, 0, 0) }
+end
 
 local rOK_PlayerEvent = ReplicatedStorage:WaitForChild("rOK_PlayerEvent", 2) -- for obby loading from server -> client
 
@@ -443,7 +447,13 @@ local CheckRules = {
 	},
 	Mover = {
 		TargetPosition = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "table" or "Vector3",
-		Optional = { LoopDelay = "number", TweenInfo = "table", Duration = "number" },
+		Optional = {
+			LoopDelay = "number",
+			TweenInfo = "table",
+			TweenIn = "table",
+			TweenOut = "table",
+			Duration = "number",
+		},
 	},
 	Conveyor = {
 		Optional = { XAxis = "number", YAxis = "number", ZAxis = "number", BasedOnRotation = "boolean" },
@@ -628,102 +638,24 @@ local function ValidateClass(className, object, data, rules)
 	return true
 end
 
--- raycast function (multi part) [@LowPolyCat]
-local allParts = nil
-local lastBlockedSet = {}
-local lastBlockedCount = 0
+-- check
+local function isStandingOn(part, characterCf)
+	local localPos = part.CFrame:PointToObjectSpace(characterCf.Position)
+	local half = part.Size * 0.5
 
-local function blockedListChanged(blocked)
-	if #blocked ~= lastBlockedCount then
-		return true
+	if math.abs(localPos.X) > half.X then
+		return false
 	end
 
-	for _, p in pairs(blocked) do
-		if not lastBlockedSet[p._id] then
-			return true -- same size but not the same parts, so its a swap
-		end
+	if math.abs(localPos.Z) > half.Z then
+		return false
 	end
 
-	return false
+	local topY = half.Y
+	local verticalDistance = localPos.Y - topY
+
+	return verticalDistance >= -0.25 and verticalDistance <= 0.25
 end
-
-local function buildPartsList(blocked)
-	local blockedSet = {}
-	for _, p in pairs(blocked) do
-		blockedSet[p._id] = true
-	end
-
-	allParts = {}
-
-	local function scan(inst, list)
-		for _, child in pairs(list and inst or inst:GetChildren()) do
-			if child:IsA("BasePart") and not blockedSet[child._id] then
-				table.insert(allParts, child)
-			end
-			scan(child)
-		end
-	end
-
-	scan(SCLI_CONFIGS.Types.Standable, true)
-
-	lastBlockedSet = blockedSet
-	lastBlockedCount = #blocked
-end
-
-local function raycastPart(pos, rayDir, maxDist, part)
-	local cf = part.CFrame
-	local half = part.Size / 2
-	local normal = Vector3.new()
-	local localPos, localDir = cf:PointToObjectSpace(pos), cf:VectorToObjectSpace(rayDir)
-	local minB, maxB = -half, half
-	local tMin, tMax = -math.huge, math.huge
-	for i = 1, 3 do
-		local direction = (i == 1 and "X") or (i == 2 and "Y") or "Z"
-		if localDir[direction] ~= 0 then
-			local t1 = (minB[direction] - localPos[direction]) / localDir[direction]
-			local t2 = (maxB[direction] - localPos[direction]) / localDir[direction]
-			local sign = 1
-			if t1 > t2 then
-				t1, t2 = t2, t1
-				sign = -1
-			end
-			if t1 > tMin then
-				tMin = t1
-				normal = Vector3.new(
-					direction == "X" and -sign or 0,
-					direction == "Y" and -sign or 0,
-					direction == "Z" and -sign or 0
-				)
-			end
-			if t2 < tMax then
-				tMax = t2
-			end
-		elseif localPos[direction] < minB[direction] or localPos[direction] > maxB[direction] then
-			return nil
-		end
-	end
-	if tMin > tMax or tMin < 0 or tMin > maxDist then
-		return nil
-	end
-	return { part = part, position = pos + rayDir * tMin, normal = cf:VectorToWorldSpace(normal), distance = tMin }
-end
-local function raycast(pos, dir, blocked)
-	blocked = blocked or {}
-	if not allParts or blockedListChanged(blocked) then
-		buildPartsList(blocked)
-	end
-	local maxDist = math.sqrt(dir.X ^ 2 + dir.Y ^ 2 + dir.Z ^ 2)
-	local rayDir = Vector3.new(dir.X / maxDist, dir.Y / maxDist, dir.Z / maxDist)
-	local closest = nil
-	for _, part in pairs(allParts) do
-		local result = raycastPart(pos, rayDir, maxDist, part)
-		if result and (not closest or result.distance < closest.distance) then
-			closest = result
-		end
-	end
-	return closest
-end
-
 local function createAJPart()
 	local newPart = Instance.new("Part")
 	newPart.CanCollide = false
@@ -772,7 +704,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 			end
 		end
 
-		if keyEvent == "QuickReset" then
+		if DCLI_CONFIGS.VALUES.EnableQuickReset and keyEvent == "QuickReset" then
 			holdingQR = true
 		end
 	end
@@ -790,15 +722,36 @@ end)
 
 -- Main Thread
 task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](function()
+	if SCLI_CONFIGS.FFlagsEditor.FFlagDisableClientSideObjects then
+		return
+	end
+
 	-- boot
 	local playerCharacter = player.Character
 	local charPivot = playerCharacter:GetPivot() :: CFrame
+
+	local Values = DCLI_CONFIGS.VALUES
+
+	local Classes = SCLI_CONFIGS.Classes
+	local Types = SCLI_CONFIGS.Types
+	local FFlags = SCLI_CONFIGS.FFlagsEditor
+
+	local Temp = CLI_Cache.Temp
+
+	local ad = Values.ActivePartDistance
+	local adsq = ad * ad
+
+	local Spinner = Classes.Spinner
+	local Orbital = Classes.Orbital
+	local Conveyor = Classes.Conveyor
+
+	local Standable = Types.Standable
 
 	if not rOK_PlayerEvent then
 		LOGF("WARN", "Damage bricks will not work due to the server-side not being installed!")
 	end
 
-	if SCLI_CONFIGS.FFlagsEditor.FFlagEnableTypeCheckerExperiment then
+	if FFlags.FFlagEnableTypeCheckerExperiment then
 		for containerClass, containerObjects in pairs(SCLI_CONFIGS) do
 			if containerClass ~= "Classes" and containerClass ~= "Types" then
 				continue
@@ -814,11 +767,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 				if containerClass == "Classes" then
 					for object, data in pairs(classChildren) do
-						if object.ClassName ~= "Part" then
-							LOGF(
-								"warn",
-								`[{className}] [{object.Name}]: dictionary key must be an BasePart or MeshPart`
-							)
+						if not object:IsA("BasePart") then
+							LOGF("warn", `[{className}] [{object.Name}]: dictionary key must be an BasePart`)
 
 							SCLI_CONFIGS[containerClass][className][object] = nil
 							continue
@@ -846,9 +796,12 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 						continue
 					end
 
-					for _, object in ipairs(classChildren) do
+					for i = #classChildren, 1, -1 do
+						local object = classChildren[i]
+
 						if rules.FunctionCheck and not rules.FunctionCheck(object) then
 							LOGF("warn", `[{className}] [{object.Name}]: object failed FunctionCheck`)
+							table.remove(classChildren, i)
 						end
 					end
 				end
@@ -856,12 +809,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-		part.Rotation *= Vector3.new(
-			data.AngleXOffset and math.rad(data.AngleXOffset) or 0,
-			data.AngleYOffset and math.rad(data.AngleYOffset) or 0,
-			data.AngleZOffset and math.rad(data.AngleZOffset) or 0
-		)
+	for part, data in pairs(Spinner) do
+		part.Rotation += Vector3.new(data.AngleXOffset or 0, data.AngleYOffset or 0, data.AngleZOffset or 0)
 
 		CLI_Cache.Temp.Spinner[part] =
 			{ math.rad(data.XAxis or 0), math.rad(data.YAxis or 0), math.rad(data.ZAxis or 0) }
@@ -869,12 +818,11 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Mover) do
 		local TweenTT = TweenService:Create(part, data.TweenIn or data.TweenInfo or TweenInfo.new(data.Duration), {
-			Position = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position
-				or data.TargetPosition,
+			Position = FFlags.FFlagUsePartInstanceOverVector3 and data.TargetPosition.Position or data.TargetPosition,
 		})
 		local TweenTO = TweenService:Create(
 			part,
-			data.TweenIn or data.TweenInfo or TweenInfo.new(data.Duration),
+			data.TweenOut or data.TweenInfo or TweenInfo.new(data.Duration),
 			{ Position = part.Position }
 		)
 
@@ -891,23 +839,24 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		end)
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-		local orbitRotation =
-			CFrame.Angles(math.rad(data.XTilt or 0), math.rad(data.YRotation or 0), math.rad(data.ZTilt or 0))
-		local offsetRotation = CFrame.Angles(
-			math.rad(data.TiltXOffset or 0),
-			math.rad(data.AngleYOffset or 0),
-			math.rad(data.TiltZOffset or 0)
-		)
-		local orbitCFrame = orbitRotation * offsetRotation
+	for part, data in pairs(Orbital) do
+		local origin = data.OrbitalOrigin
 
 		CLI_Cache.Temp.Orbital[part] = {
-			curAngle = 0,
-			orbitCFrame = orbitCFrame,
+			Angle = 0,
+			Speed = math.rad(data.Speed or 0),
+			Offset = data.OrbitalOffset or 0,
+			Origin = origin,
+			OrbitCFrame = CFrame.Angles(
+				math.rad((data.XTilt or 0) + (data.TiltXOffset or 0)),
+				math.rad((data.YRotation or 0) + (data.AngleYOffset or 0)),
+				math.rad((data.ZTilt or 0) + (data.TiltZOffset or 0))
+			),
+			FaceCenter = data.OrbitalFaceCenter == true,
 		}
 	end
 
-	for part, data in pairs(SCLI_CONFIGS.Classes.Conveyor) do
+	for part, data in pairs(Conveyor) do
 		part.Touched:Connect(function(hit)
 			if hit and hit._id and hit._id == playerCharacter._id then
 				CLI_Cache.Temp.Conveyor[part] = true
@@ -929,11 +878,11 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		part.Touched:Connect(function(hit)
 			if data.AllowPlayer and hit and hit._id and hit._id == playerCharacter._id then
 				playerCharacter:PivotTo(
-					SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame
+					FFlags.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame
 						or CFrame.new(data.TargetPosition)
 				)
 			elseif data.AllowParts then
-				hit.CFrame = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame
+				hit.CFrame = FFlags.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame
 					or CFrame.new(data.TargetPosition)
 			end
 		end)
@@ -1056,10 +1005,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 
 	for part, data in pairs(SCLI_CONFIGS.Classes.Button) do
 		local active = false
-		local breakDelay = false
-
 		local deactivateid = 0
-
 		local original = {}
 
 		for part1 in pairs(data.Modify or {}) do
@@ -1152,7 +1098,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 						or (ddata.ActivateOnPart and hit:IsA("BasePart"))
 
 					if shouldDeactivate and active then
-						breakDelay = true
 						deactivateid += 1
 						deactivate()
 					end
@@ -1178,8 +1123,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 	end
 
 	local function applyBeatProperties(parts, properties)
-		for _, part in ipairs(parts) do
+		for i = 1, #parts do
 			local tweenInfo = properties.TweenInfo
+			local part = parts[i]
 
 			if tweenInfo then
 				local tweenProperties = table.clone(properties)
@@ -1200,6 +1146,8 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		charPivot = playerCharacter:GetPivot() :: CFrame
 		elapsed += dt
 
+		local newPivot = charPivot
+
 		local ok, result = xpcall(function()
 			if holdingQR then
 				heldQRTime += dt
@@ -1215,52 +1163,49 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				heldQRTime = 0
 			end
 
-			local result = raycast(charPivot.Position + Vector3.new(0, 2, 0), Vector3.new(0, -2.25, 0), {})
+			local result, detectedStandable
 
-			if result and result.normal.Y > 0.5 then
-				local standable = result.part
-				if currentTouchedStandable ~= standable then
-					currentTouchedStandable = standable
-					lastCf = standable.CFrame
+			for i = 1, #Standable do
+				local standablePart = Standable[i]
+
+				if isStandingOn(standablePart, charPivot) then
+					detectedStandable = standablePart
+					break
 				end
-			else
-				currentTouchedStandable = nil
-				lastCf = nil
 			end
 
-			for part, data in pairs(SCLI_CONFIGS.Classes.Spinner) do
-				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
+			if detectedStandable ~= currentTouchedStandable then
+				currentTouchedStandable = detectedStandable
+				lastCf = detectedStandable and detectedStandable.CFrame or nil
+			end
+
+			for part, data in pairs(Spinner) do
+				local offset = part.Position - charPivot.Position
+				if offset:Dot(offset) < adsq then
 					local dir = CLI_Cache.Temp.Spinner[part]
-					part.CFrame *= (CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt))
+					part.CFrame *= CFrame.Angles(dir[1] * dt, dir[2] * dt, dir[3] * dt)
 				end
 			end
 
-			for part, data in pairs(SCLI_CONFIGS.Classes.Orbital) do
-				if (part.Position - charPivot.Position).Magnitude < DCLI_CONFIGS.VALUES.ActivePartDistance then
-					local cAngle = CLI_Cache.Temp.Orbital[part].curAngle
-					local orbitCFrame = CLI_Cache.Temp.Orbital[part].orbitCFrame
+			for part, data in pairs(Orbital) do
+				local offset = part.Position - charPivot.Position
+				if offset:Dot(offset) < adsq then
+					local dir = Temp.Orbital[part]
 
-					cAngle += math.rad(data.Speed) * dt
-					local off = orbitCFrame:VectorToWorldSpace(
-						Vector3.new(
-							math.cos(cAngle) * (data.OrbitalOffset or 0),
-							0,
-							math.sin(cAngle) * (data.OrbitalOffset or 0)
-						)
+					dir.Angle += dir.Speed * dt
+
+					local angle = dir.Angle
+					local offset = dir.OrbitCFrame:VectorToWorldSpace(
+						Vector3.new(math.cos(angle) * dir.Offset, 0, math.sin(angle) * dir.Offset)
 					)
 
-					local pos = (
-						SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and data.OrbitalOrigin.Position
-						or data.OrbitalOrigin
-					) + off
+					local position = dir.Origin.Position + offset
 
-					if data.OrbitalFaceCenter then
-						part.CFrame = CFrame.lookAt(pos, data.OrbitalOrigin.Position)
+					if dir.FaceCenter then
+						part.CFrame = CFrame.lookAt(position, dir.Origin.Position)
 					else
-						part.Position = pos
+						part.Position = position
 					end
-
-					CLI_Cache.Temp.Orbital[part].curAngle = cAngle
 				end
 			end
 
@@ -1296,13 +1241,9 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				local data = SCLI_CONFIGS.Classes.Conveyor[part]
 
 				if data.BasedOnRotation then
-					local movement = part.CFrame.LookVector * (data.BaseSpeed or 0) * dt
-					playerCharacter:PivotTo(charPivot + movement)
-					charPivot += movement
+					newPivot += part.CFrame.LookVector * (data.BaseSpeed or 0) * dt
 				else
-					local movement = Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
-					playerCharacter:PivotTo(charPivot + movement)
-					charPivot += movement
+					newPivot += Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
 				end
 			end
 
@@ -1310,9 +1251,13 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				local currentCf = currentTouchedStandable.CFrame
 				local delta = currentCf * lastCf:Inverse()
 
-				playerCharacter:PivotTo(delta * charPivot)
-				charPivot *= delta
+				newPivot = delta * newPivot
+
 				lastCf = currentCf
+			end
+
+			if newPivot ~= charPivot then
+				playerCharacter:PivotTo(newPivot)
 			end
 
 			playerCharacter.Humanoid.WalkSpeed = playerWalkspeed + playerAddedWalkspeed
