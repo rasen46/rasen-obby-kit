@@ -23,7 +23,7 @@ if not rOK_PlayerEvent then
 	rOK_PlayerEvent.Name = "rOK_PlayerEvent"
 	rOK_PlayerEvent.Parent = ReplicatedStorage
 
-	warn(
+	print(
 		"rOK_PlayerEvent' does not exist inside ReplicatedStorage, any objects that require server authority will not function as intented due to events made via 'Instance.new' being non-functional"
 	)
 end
