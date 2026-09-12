@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.1.1 dev release (server)
+version 0.1.2 dev release (server)
 
 please dont strip credits from this
 ]]
@@ -23,7 +23,7 @@ if not rOK_PlayerEvent then
 	rOK_PlayerEvent.Name = "rOK_PlayerEvent"
 	rOK_PlayerEvent.Parent = ReplicatedStorage
 
-	warn(
+	print(
 		"rOK_PlayerEvent' does not exist inside ReplicatedStorage, any objects that require server authority will not function as intented due to events made via 'Instance.new' being non-functional"
 	)
 end
