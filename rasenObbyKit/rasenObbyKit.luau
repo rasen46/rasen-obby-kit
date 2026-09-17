@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.3.7 dev release
+version 0.4.0 dev release
 
 please dont strip credits from this
 ]]
@@ -323,10 +323,6 @@ local CheckRules = {
 			Duration = "number",
 		},
 	},
-	Conveyor = {
-		Optional = { XAxis = "number", YAxis = "number", ZAxis = "number", BasedOnRotation = "boolean" },
-		Dependencies = { BasedOnRotation = { BaseSpeed = "number" } },
-	},
 	Teleporter = {
 		TargetPosition = "table",
 		Optional = {
@@ -358,23 +354,6 @@ local CheckRules = {
 			Duration = "number",
 			Walkspeed = "number",
 			Jumppower = "number",
-		},
-	},
-	ButtonDeactivate = {
-		ButtonToDeactivate = "table",
-		Optional = {
-			ActivateOnHumanoid = "boolean",
-			ActivateOnPart = "boolean",
-		},
-	},
-	Button = {
-		Optional = {
-			Duration = "number",
-			ActivateOnHumanoid = "boolean",
-			ActivateOnPart = "boolean",
-			Modify = "table",
-			OnActivate = "function",
-			OnDeactivate = "function",
 		},
 	},
 	Standable = {
@@ -724,20 +703,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 		}
 	end
 
-	for part, data in pairs(Conveyor) do
-		part.Touched:Connect(function(hit)
-			if hit and hit._id and hit._id == playerCharacter._id then
-				CLI_Cache.Temp.Conveyor[part] = true
-			end
-		end)
-
-		part.TouchEnded:Connect(function(hit)
-			if CLI_Cache.Temp.Conveyor[part] then
-				CLI_Cache.Temp.Conveyor[part] = nil
-			end
-		end)
-	end
-
 	for part, data in pairs(SCLI_CONFIGS.Classes.Teleporter) do
 		if data.AllowPlayer == nil then
 			data.AllowPlayer = true
@@ -869,109 +834,6 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 				end)
 			end
 		end)
-	end
-
-	for part, data in pairs(SCLI_CONFIGS.Classes.Button) do
-		local active = false
-		local deactivateid = 0
-		local original = {}
-
-		for part1 in pairs(data.Modify or {}) do
-			original[part1] = {
-				Transparency = part1.Transparency,
-				CFrame = part1.CFrame,
-				CanCollide = part1.CanCollide,
-				Size = part1.Size,
-			}
-		end
-
-		local function deactivate()
-			if not active then
-				return
-			end
-
-			if data.OnDeactivate then
-				data.OnDeactivate(part)
-			end
-
-			active = false
-
-			for bpart, bpartdata in pairs(data.Modify or {}) do
-				local newTween = TweenService:Create(bpart, bpartdata.TweenOut or TweenInfo.new(0.2), {
-					Transparency = original[bpart].Transparency,
-					CFrame = original[bpart].CFrame,
-					Size = original[bpart].Size,
-				})
-
-				bpart.CanCollide = original[bpart].CanCollide
-				newTween:Play()
-			end
-		end
-
-		part.Touched:Connect(function(hit)
-			local humanoid = hit
-				and hit._id
-				and hit._id == playerCharacter._id
-				and playerCharacter:FindFirstChildOfClass("Humanoid")
-
-			if (data.ActivateOnHumanoid ~= false and humanoid) or data.ActivateOnPart then
-				if active then
-					return
-				end
-
-				active = true
-
-				if data.OnActivate then
-					data.OnActivate(part)
-				end
-
-				for bpart, bpartdata in pairs(data.Modify or {}) do
-					local position = bpartdata.Position or bpart.Position
-					local rotation = bpartdata.Rotation or bpart.Rotation
-
-					local newTween =
-						TweenService:Create(bpart, bpartdata.TweenIn or data.TweenInfo or TweenInfo.new(0.2), {
-							Transparency = bpartdata.Transparency or bpart.Transparency,
-							CFrame = CFrame.new(position)
-								* CFrame.Angles(math.rad(rotation.X), math.rad(rotation.Y), math.rad(rotation.Z)),
-							Size = bpartdata.Size or bpart.Size,
-						})
-					bpart.CanCollide = bpartdata.CanCollide or false
-
-					newTween:Play()
-				end
-
-				if data.Duration and data.Duration > 0 then
-					deactivateid += 1
-					local id = deactivateid
-
-					task.delay(data.Duration, function()
-						if id == deactivateid then
-							deactivate()
-						end
-					end)
-				end
-			end
-		end)
-
-		for dpart, ddata in pairs(SCLI_CONFIGS.Classes.ButtonDeactivate) do
-			if ddata.ButtonToDeactivate._id == part._id then
-				dpart.Touched:Connect(function(hit)
-					local humanoid = hit
-						and hit._id
-						and hit._id == playerCharacter._id
-						and playerCharacter:FindFirstChildOfClass("Humanoid")
-
-					local shouldDeactivate = (ddata.ActivateOnHumanoid ~= false and humanoid ~= nil)
-						or (ddata.ActivateOnPart and hit:IsA("BasePart"))
-
-					if shouldDeactivate and active then
-						deactivateid += 1
-						deactivate()
-					end
-				end)
-			end
-		end
 	end
 
 	for i = 1, #SCLI_CONFIGS.Types.IsPushable do
@@ -1106,13 +968,7 @@ task[SCLI_CONFIGS.FFlagsEditor.FFlagDeferMainThread and "defer" or "spawn"](func
 			end
 
 			for part in pairs(CLI_Cache.Temp.Conveyor) do
-				local data = SCLI_CONFIGS.Classes.Conveyor[part]
 
-				if data.BasedOnRotation then
-					newPivot += part.CFrame.LookVector * (data.BaseSpeed or 0) * dt
-				else
-					newPivot += Vector3.new(data.XAxis or 0, data.YAxis or 0, data.ZAxis or 0) * dt
-				end
 			end
 
 			if currentTouchedStandable and lastCf then
