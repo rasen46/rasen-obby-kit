@@ -2,9 +2,19 @@ local module = {}
 local cache = {}
 module.TypeChecker = {}
 
-function module.Init(partReference, partData) 
-    cache[partReference._id] = partData
+module.Packages = {
+	TempStorage = "TempStorage",
+}
+
+function module.Init(partReference, partData)
+	local ts = module.Packages.TempStorage
+	partReference.Touched:Connect(function(hit)
+		local dir = ts.GetClass("Pushables")[hit._id]
+
+		if dir then
+			hit.CFrame = dir.CFrame
+		end
+	end)
 end
-function module.Thread(dt) end
 
 return module

@@ -1,10 +1,17 @@
 local module = {}
-local cache = {}
 module.TypeChecker = {}
 
-function module.Init(partReference, partData) 
-    cache[partReference._id] = partData
+module.Packages = {
+	TempStorage = "TempStorage",
+}
+
+function module.Init(partReference, partData)
+	local ts = module.Packages.TempStorage
+	if not ts.GetClass("Pushables") then
+		ts.AddClass("Pushables")
+	end
+
+	ts.AppendEntry("Pushables", partReference._id, { CFrame = partReference.CFrame })
 end
-function module.Thread(dt) end
 
 return module

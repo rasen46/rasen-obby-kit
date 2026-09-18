@@ -6,7 +6,7 @@ module.TypeChecker = {
 }
 
 module.Packages = {
-	PivotService = "PivotService",
+	PlayerService = "PlayerService",
 }
 
 function module.Init(partReference, partData)
@@ -35,13 +35,13 @@ function module.Thread(dt)
 		return
 	end
 
-	local currentPiv = module.Packages.PivotService.GetPlayerCurrentPivot()
+	local currentPiv = module.Packages.PlayerService.GetPlayerCurrentPivot()
 	if gotCache.BasedOnRotation then
-		module.Packages.PivotService.ChangePlayerPivot(
+		module.Packages.PlayerService.ChangePlayerPivot(
 			currentPiv + partReference.CFrame.LookVector * gotCache.BaseSpeed * dt
 		)
 	else
-		module.Packages.PivotService.ChangePlayerPivot(
+		module.Packages.PlayerService.ChangePlayerPivot(
 			currentPiv + gotCache.Direction * dt
 		)
 	end

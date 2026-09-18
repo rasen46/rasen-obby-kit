@@ -13,8 +13,13 @@ module.TypeChecker = {
 	},
 }
 
+module.Packages = {
+	TempStorage = "TempStorage"
+}
+
 function module.Init(partReference, partData)
-	local part = partReference
+	local ts = module.Packages.TempStorage
+
 	local modify = partData.Modify or {}
 
 	local active = false
@@ -26,7 +31,7 @@ function module.Init(partReference, partData)
 	local activateOnHumanoid = partData.ActivateOnHumanoid ~= false
 	local activateOnPart = partData.ActivateOnPart == true
 
-	local duration = partData.Duration
+	local duration = partData.Duration or 1
 	local defaultTween = partData.TweenInfo or DEFAULT_TWEEN
 
 	local original = {}
@@ -66,7 +71,7 @@ function module.Init(partReference, partData)
 		active = false
 
 		if onDeactivate then
-			onDeactivate(part)
+			onDeactivate(partReference)
 		end
 
 		for bpart, target in pairs(modified) do
@@ -90,7 +95,7 @@ function module.Init(partReference, partData)
 		active = true
 
 		if onActivate then
-			onActivate(part)
+			onActivate(partReference)
 		end
 
 		for bpart, target in pairs(modified) do
@@ -116,7 +121,7 @@ function module.Init(partReference, partData)
 		end
 	end
 
-	part.Touched:Connect(function(hit)
+	partReference.Touched:Connect(function(hit)
 		if not hit then
 			return
 		end
@@ -135,7 +140,7 @@ function module.Init(partReference, partData)
 	for dpart, ddata in pairs(SCLI_CONFIGS.Classes.ButtonDeactivate) do
 		local button = ddata.ButtonToDeactivate
 
-		if button and button._id == part._id then
+		if button and button._id == partReference._id then
 			local deactivateOnHumanoid = ddata.ActivateOnHumanoid ~= false
 			local deactivateOnPart = ddata.ActivateOnPart == true
 
