@@ -1,6 +1,6 @@
 local module = {}
 module.Packages = {
-    FFlags = "FFlags"
+	FFlags = "FFlags",
 }
 module.Rules = {}
 
@@ -32,12 +32,18 @@ local function ValidateClass(className, object, data, rules)
 			local value = data[propertyName]
 
 			if value == nil then
-				print(`[TypeSolver/WARN] [{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`)
+				print(
+					`[TypeSolver/WARN] [{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`
+				)
 				return false
 			end
 
 			if not CheckValue(value, expectedType) then
-				print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`)
+				print(
+					`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(
+						value
+					)}`
+				)
 				return false
 			end
 		end
@@ -49,7 +55,11 @@ local function ValidateClass(className, object, data, rules)
 
 			if expectedType then
 				if not CheckValue(value, expectedType) then
-					print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`)
+					print(
+						`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(
+							value
+						)}`
+					)
 					return false
 				end
 			end
@@ -65,13 +75,18 @@ local function ValidateClass(className, object, data, rules)
 					local value = data[dependencyName]
 
 					if value == nil then
-						print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" is required when "{propertyName}" is set`)
+						print(
+							`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" is required when "{propertyName}" is set`
+						)
 						return false
 					end
 
 					if not CheckValue(value, expectedType) then
-						print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {typeof(value
-)}`)
+						print(
+							`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {typeof(
+								value
+							)}`
+						)
 						return false
 					end
 				end
@@ -100,37 +115,38 @@ local function ValidateClass(className, object, data, rules)
 end
 
 function module.TypeSolve(table)
-    for containerClass, containerObjects in pairs(table) do
+	for containerClass, containerObjects in pairs(table) do
 		if containerClass ~= "Classes" and containerClass ~= "Types" then
 			continue
 		end
-		
+
 		for className, classChildren in pairs(containerObjects) do
 			local rules = module.Rules[className]
 			if not rules then
 				print(`[TypeSolver/WARN]: Unknown {containerClass} "{className}"`)
 				continue
 			end
-				
+
 			if containerClass == "Classes" then
 				for object, data in pairs(classChildren) do
 					if not object:IsA("BasePart") then
 						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: dictionary key must be an BasePart`)
-						
+
 						table[containerClass][className][object] = nil
 						continue
 					end
-					
+
 					if typeof(data) ~= "table" then
-						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: configuration for {object.Name} must be a table`
-)
-						
+						print(
+							`[TypeSolver/WARN] [{className}] [{object.Name}]: configuration for {object.Name} must be a table`
+						)
+
 						SCLI_CONFIGS[containerClass][className][object] = nil
 						continue
 					end
-					
+
 					local result = ValidateClass(className, object, data, rules)
-					
+
 					if not result then
 						table[containerClass][className][object] = nil
 					end
@@ -142,7 +158,7 @@ function module.TypeSolve(table)
 				end
 				for i = #classChildren, 1, -1 do
 					local object = classChildren[i]
-						
+
 					if rules.FunctionCheck and not rules.FunctionCheck(object) then
 						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: object failed FunctionCheck`)
 						table.remove(classChildren, i)

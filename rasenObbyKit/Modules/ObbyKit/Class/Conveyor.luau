@@ -10,7 +10,7 @@ module.Packages = {
 }
 
 function module.Boot(partReference, partData)
-    local ps = module.Packages.PlayerService
+	local ps = module.Packages.PlayerService
 	cache[partReference] = {
 		Active = false,
 		BasedOnRotation = partData.BasedOnRotation and partData.BasedOnRotation == true,
@@ -32,21 +32,19 @@ function module.Boot(partReference, partData)
 end
 
 function module.Thread(dt)
-    local PS = module.Packages.PlayerService
-    for part, data in pairs(cache) do
-        if not data.Active then continue end
-        local currentPiv = PS.GetPlayerCurrentPivot()
-        
-		if data.BasedOnRotation then
-			PS.ChangePlayerPivot(
-				currentPiv + part.CFrame.LookVector * data.BaseSpeed * dt
-			)
-		else
-			PS.ChangePlayerPivot(
-				currentPiv + data.Direction * dt
-			)
+	local PS = module.Packages.PlayerService
+	for part, data in pairs(cache) do
+		if not data.Active then
+			continue
 		end
-    end
+		local currentPiv = PS.GetPlayerCurrentPivot()
+
+		if data.BasedOnRotation then
+			PS.ChangePlayerPivot(currentPiv + part.CFrame.LookVector * data.BaseSpeed * dt)
+		else
+			PS.ChangePlayerPivot(currentPiv + data.Direction * dt)
+		end
+	end
 end
 
 return module

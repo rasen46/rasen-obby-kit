@@ -8,21 +8,21 @@ local cCount = 0
 local module = {}
 
 module.Packages = {
-    FFlags = "FFlags",
-    ClientConfigs = "ClientConfigs",
-    PlayerService = "PlayerService"
+	FFlags = "FFlags",
+	ClientConfigs = "ClientConfigs",
+	PlayerService = "PlayerService",
 }
 
 function module.Init()
-    local FFLags = module.Packages.FFlags
-    local CC = module.Packages.ClientConfigs
-    local PS = module.Packages.PlayerService
-    
-    if not spawnLocation then
+	local FFLags = module.Packages.FFlags
+	local CC = module.Packages.ClientConfigs
+	local PS = module.Packages.PlayerService
+
+	if not spawnLocation then
 		print("[WARN]: Could not find any part named SpawnLocation, defaulting to 0, 0, 0")
 		spawnLocation = { CFrame = CFrame.new(0, 0, 0) }
 	end
-	
+
 	local function createAJPart()
 		local newPart = Instance.new("Part")
 		newPart.CanCollide = false
@@ -34,12 +34,12 @@ function module.Init()
 
 		return newPart
 	end
-    
-    UIS.InputBegan:Connect(function(inp, pro)
+
+	UIS.InputBegan:Connect(function(inp, pro)
 		if pro then
-			return 
+			return
 		end
-		
+
 		local keyEvent = CC.DCLI_CONFIGS.KEYBINDS[inp.KeyCode]
 		local playerCharacter = PS.Data.CurrentCharacter
 		local charPivot = playerCharacter:GetPivot() :: CFrame
@@ -69,7 +69,7 @@ function module.Init()
 					Checkpoints[cCount] = nil
 					cCount -= 1
 				end
-			end 
+			end
 		end
 	end)
 end

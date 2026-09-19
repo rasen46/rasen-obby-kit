@@ -2,7 +2,7 @@ local function applyBeatProperties(parts, properties)
 	for i = 1, #parts do
 		local tweenInfo = properties.TweenInfo
 		local part = parts[i]
-		
+
 		if tweenInfo then
 			local tweenProperties = table.clone(properties)
 			tweenProperties.TweenInfo = nil
@@ -20,19 +20,19 @@ local module = {}
 local cache = {}
 
 function module.Boot(groupName, groupData)
-    cache[groupName] = {
+	cache[groupName] = {
 		Elapsed = 0,
 		Index = 1,
-		groupData = groupData
+		groupData = groupData,
 	}
 end
 
 function module.Thread(dt)
 	for groupName, cacheData in pairs(cache) do
-	    local groupData = cacheData.groupData
-	    cacheData.Elapsed += dt
-	    
-	    if cacheData.Elapsed >= groupData.BeatInterval then
+		local groupData = cacheData.groupData
+		cacheData.Elapsed += dt
+
+		if cacheData.Elapsed >= groupData.BeatInterval then
 			cacheData.Elapsed -= groupData.BeatInterval
 			cacheData.Index += 1
 

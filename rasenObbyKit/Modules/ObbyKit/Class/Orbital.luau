@@ -33,7 +33,7 @@ function module.Boot(partReference, partData)
 end
 
 function module.Thread(dt)
-    for part, data in pairs(cache) do
+	for part, data in pairs(cache) do
 		data.Angle += data.Speed * dt
 		local offset = data.OrbitCFrame:VectorToWorldSpace(
 			Vector3.new(math.cos(data.Angle) * data.Offset, 0, math.sin(data.Angle) * data.Offset)
@@ -46,7 +46,7 @@ function module.Thread(dt)
 		else
 			part.Position = position
 		end
-    end
+	end
 end
 
 return module

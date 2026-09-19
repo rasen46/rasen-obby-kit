@@ -1,5 +1,5 @@
 local configs = {
-    DCLI_CONFIGS = {}
+	DCLI_CONFIGS = {},
 }
 
 return configs

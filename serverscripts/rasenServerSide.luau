@@ -8,7 +8,7 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.1.2 beta release (server)
+version 0.1.2 release (server)
 
 please dont strip credits from this
 ]]
@@ -24,12 +24,11 @@ if not rOK_PlayerEvent then
 	rOK_PlayerEvent.Parent = ReplicatedStorage
 
 	print(
-		"rOK_PlayerEvent' does not exist inside ReplicatedStorage, any objects that require server authority will not function as intented due to events made via 'Instance.new' being non-functional"
+		"'rOK_PlayerEvent' does not exist inside ReplicatedStorage, any objects that require server authority will not function as intented due to events made via 'Instance.new' being non-functional"
 	)
 end
 
-rOK_PlayerEvent.OnServerEvent:Connect(function(userId, EType, ...)
-	local player = Players:GetPlayers()[userId]
+rOK_PlayerEvent.OnServerEvent:Connect(function(player, EType, ...)
 	local args = { ... }
 
 	if EType == "damage" then
