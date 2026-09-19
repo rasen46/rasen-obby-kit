@@ -2,10 +2,23 @@
 a client-side object handler for a game named "Vortex"
 
 ## Installation
-1. Get the place file from `places`, you can either choose from `obbyutils.vrtx` which has premade client side objects or get `obbyutils.vrtx` which has none
+1. Get the place file from `places`, you can either choose from `obbyutils.vrtx` which has premade client side objects or get `obbyutilsBlank.vrtx` which has none
 2. And you're done (im hoping that Halo adds a way to export models soon, as this method of installation is not very efficient)
 
+OR
+
+1. Get the place file from `places`, specifically `obbyutilsBlank.vrtx` 
+2. Copy the `rasenObbyKit` local script from `StarterPlayerScripts`
+3. Close the place
+4. Open the place you want to have the kit in
+5. Paste it inside `StarterPlayerScripts`
+6. Do the same for the `rasenServerSide` script inside `ServerScriptService` and put it inside `ServerScriptService` instead of `StarterPlayerScripts`
+7. Make a RemoteEvent inside ReplicatedStorage and name it specifically `rOK_PlayerEvent` (this is so it won't interfere with other remotes if u have any)
+8. And you're done!
+
 ## Updating or downgrading the kit
+### Refer to the second install option if updating*
+
 You can simply transfer the `obbydata` from your current kit to the one you want to use
 
 or in a somewhat more detailed explaination...
