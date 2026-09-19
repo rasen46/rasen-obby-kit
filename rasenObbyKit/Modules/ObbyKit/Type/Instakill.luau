@@ -1,5 +1,4 @@
 local module = {}
-local cache = {}
 module.TypeChecker = {
 	FunctionCheck = function(b)
 		return b:IsA("BasePart")
@@ -8,20 +7,25 @@ module.TypeChecker = {
 
 module.Packages = {
 	PlayerService = "PlayerService",
+	RemoteEvent = "RemoteEvent"
 }
 
-function module.Init(partReference, partData)
-    local ps = module.Packages.PlayerService
+function module.Boot(_, partReference)
+    local PS = module.Packages.PlayerService
+    local RE = module.Packages.RemoteEvent
+    
+    local plrEvent = RE.PlayerEvent
+    
+    if not plrEvent then return end
+    
 	partReference.Touched:Connect(function(hit)
 		local humanoid = hit
-			and hit._id
-			and hit._id == ps.Data.CurrentCharacter._id
-			and ps.Data.CurrentCharacter:FindFirstChildOfClass("Humanoid")
+			and PS.IsPlayerCharacter(hit)
+			and PS.Data.CurrentCharacter:FindFirstChildOfClass("Humanoid")
 		if humanoid then
-			rOK_PlayerEvent:FireServer("damage", humanoid.Health)
+			plrEvent:FireServer("damage", math.huge)
 		end
 	end)
 end
-function module.Thread(dt) end
 
 return module

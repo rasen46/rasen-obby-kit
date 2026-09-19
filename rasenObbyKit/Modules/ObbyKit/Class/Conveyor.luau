@@ -9,42 +9,44 @@ module.Packages = {
 	PlayerService = "PlayerService",
 }
 
-function module.Init(partReference, partData)
-	cache[partReference._id] = {
+function module.Boot(partReference, partData)
+    local ps = module.Packages.PlayerService
+	cache[partReference] = {
 		Active = false,
-		BasedOnRotation = partData.BasedOnRotation == true,
+		BasedOnRotation = partData.BasedOnRotation and partData.BasedOnRotation == true,
 		BaseSpeed = partData.BaseSpeed or 0,
 		Direction = Vector3.new(partData.XAxis or 0, partData.YAxis or 0, partData.ZAxis or 0),
 	}
 
-	part.Touched:Connect(function(hit)
-		if hit and hit._id and hit._id == playerCharacter._id then
-			cache[partReference._id].Active = true
+	partReference.Touched:Connect(function(hit)
+		if ps.IsPlayerCharacter(hit) then
+			cache[partReference].Active = true
 		end
 	end)
 
-	part.TouchEnded:Connect(function(hit)
-		if cache[partReference._id] then
-			cache[partReference._id].Active = false
+	partReference.TouchEnded:Connect(function(hit)
+		if cache[partReference] then
+			cache[partReference].Active = false
 		end
 	end)
 end
-function module.Thread(dt)
-    local gotCache = cache[partReference._id]
-	if not gotCache or not gotCache.Active then
-		return
-	end
 
-	local currentPiv = module.Packages.PlayerService.GetPlayerCurrentPivot()
-	if gotCache.BasedOnRotation then
-		module.Packages.PlayerService.ChangePlayerPivot(
-			currentPiv + partReference.CFrame.LookVector * gotCache.BaseSpeed * dt
-		)
-	else
-		module.Packages.PlayerService.ChangePlayerPivot(
-			currentPiv + gotCache.Direction * dt
-		)
-	end
+function module.Thread(dt)
+    local PS = module.Packages.PlayerService
+    for part, data in pairs(cache) do
+        if not data.Active then continue end
+        local currentPiv = PS.GetPlayerCurrentPivot()
+        
+		if data.BasedOnRotation then
+			PS.ChangePlayerPivot(
+				currentPiv + part.CFrame.LookVector * data.BaseSpeed * dt
+			)
+		else
+			PS.ChangePlayerPivot(
+				currentPiv + data.Direction * dt
+			)
+		end
+    end
 end
 
 return module

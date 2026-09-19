@@ -14,11 +14,13 @@ module.TypeChecker = {
 }
 
 module.Packages = {
-	TempStorage = "TempStorage"
+	TempStorage = "TempStorage",
+	PlayerService = "PlayerService"
 }
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
 	local ts = module.Packages.TempStorage
+	local ps = module.Packages.PlayerService
 
 	local modify = partData.Modify or {}
 
@@ -126,40 +128,38 @@ function module.Init(partReference, partData)
 			return
 		end
 
-		local humanoid = activateOnHumanoid
-			and hit._id == playerCharacter._id
-			and playerCharacter:FindFirstChildOfClass("Humanoid")
+		local player = activateOnHumanoid
+and ps.IsPlayerCharacter(hit)
 
-		local shouldActivate = (humanoid ~= nil) or (activateOnPart and hit:IsA("BasePart"))
-
-		if shouldActivate then
+		if player ~= nil or (activateOnPart and hit:IsA("BasePart")) then
 			activate()
 		end
 	end)
+	
+	task.defer(function()
+	    for dpart, ddata in pairs(ts.GetClass("ButtonDeactivate")) do
+			local button = ddata.ButtonToDeactivate
+			
+			if button and button._id == partReference._id then
+				local deactivateOnHumanoid = ddata.ActivateOnHumanoid ~= false
+				local deactivateOnPart = ddata.ActivateOnPart == true
+				
+				dpart.Touched:Connect(function(hit)
+					if not active or not hit then
+						return
+					end
+					
+					local player = activateOnHumanoid
+and ps.IsPlayerCharacter(hit)
 
-	for dpart, ddata in pairs(SCLI_CONFIGS.Classes.ButtonDeactivate) do
-		local button = ddata.ButtonToDeactivate
-
-		if button and button._id == partReference._id then
-			local deactivateOnHumanoid = ddata.ActivateOnHumanoid ~= false
-			local deactivateOnPart = ddata.ActivateOnPart == true
-
-			dpart.Touched:Connect(function(hit)
-				if not active or not hit then
-					return
-				end
-
-				local humanoid = deactivateOnHumanoid
-					and hit._id == playerCharacter._id
-					and playerCharacter:FindFirstChildOfClass("Humanoid")
-
-				if humanoid ~= nil or deactivateOnPart and hit:IsA("BasePart") then
-					deactivateId += 1
-					deactivate()
-				end
-			end)
+					if player ~= nil or (deactivateOnPart and hit:IsA("BasePart")) then
+						deactivateId += 1
+						deactivate()
+					end
+				end)
+			end
 		end
-	end
+	end)
 end
 
 return module

@@ -17,19 +17,32 @@ module.TypeChecker = {
 		TweenIn = "table",
 	},
 }
+module.Packages = {
+    PlayerService = "PlayerService"
+}
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
+    local PS = module.Packages.PlayerService
+    
 	local canFade = true
-	local originalTransparency = part.Transparency
-	local origin = part.Position
-	local TweenTT = TweenService:Create(part, partData.TweenOut or partData.TweenInfo or TweenInfo.new(partData.Duration), {
+	local originalTransparency = partReference.Transparency
+	local origin = partReference.Position
+	
+	local targetPosition = partData.TargetPosition
+
+	if typeof(targetPosition) == "Instance" and targetPosition:IsA("BasePart") then
+		targetPosition = targetPosition.Position
+	end
+
+	targetPosition = targetPosition or origin
+	
+	local TweenTT = TweenService:Create(partReference, partData.TweenOut or partData.TweenInfo or TweenInfo.new(partData.Duration), {
 		Transparency = partData.TargetTransparency or 1,
-		Position = partData.TargetPosition
-				and (SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and partData.TargetPosition.Position or partData.TargetPosition)
-			or origin,
+		Position = targetPosition,
 	})
+	
 	local TweenTO =
-		TweenService:Create(part, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.RespawnDuration or 1), {
+		TweenService:Create(partReference, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.RespawnDuration or 1), {
 			Transparency = originalTransparency,
 			Position = origin,
 		})
@@ -37,23 +50,24 @@ function module.Init(partReference, partData)
 	if partData.AllowPlayer == nil then
 		partData.AllowPlayer = true
 	end
-
-	part.Touched:Connect(function(hit)
+	
+	partReference.Touched:Connect(function(hit)
 		if not canFade then
 			return
 		end
-		if partData.AllowPlayer and hit and hit._id == playerCharacter._id then
+		
+		if partData.AllowPlayer and PS.IsPlayerCharacter(hit) then
 			canFade = false
 			if partData.ConnectOnTrigger then
-				partData.ConnectOnTrigger(part)
+				partData.ConnectOnTrigger(partReference)
 			end
 
 			TweenTT:Play()
 			TweenTT.Completed:Wait()
-			part.CanCollide = false
+			partReference.CanCollide = false
 			task.wait(partData.RespawnDelay or 1)
 
-			part.CanCollide = true
+			partReference.CanCollide = true
 			TweenTO:Play()
 			TweenTO.Completed:Wait()
 
@@ -61,15 +75,15 @@ function module.Init(partReference, partData)
 		elseif partData.AllowParts then
 			canFade = false
 			if partData.ConnectOnTrigger then
-				partData.ConnectOnTrigger(part)
+				partData.ConnectOnTrigger(partReference)
 			end
 
 			TweenTT:Play()
 			TweenTT.Completed:Wait()
-			part.CanCollide = false
+			partReference.CanCollide = false
 			task.wait(partData.RespawnDelay or 0)
 
-			part.CanCollide = true
+			partReference.CanCollide = true
 			TweenTO:Play()
 			TweenTO.Completed:Wait()
 
@@ -77,6 +91,5 @@ function module.Init(partReference, partData)
 		end
 	end)
 end
-function module.Thread(dt) end
 
 return module

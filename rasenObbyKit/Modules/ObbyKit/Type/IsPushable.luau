@@ -5,7 +5,7 @@ module.Packages = {
 	TempStorage = "TempStorage",
 }
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
 	local ts = module.Packages.TempStorage
 	if not ts.GetClass("Pushables") then
 		ts.AddClass("Pushables")

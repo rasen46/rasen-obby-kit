@@ -1,7 +1,7 @@
 local module = {}
 local cache = {}
 module.TypeChecker = {
-	TargetPosition = SCLI_CONFIGS.FFlagsEditor.FFlagUsePartInstanceOverVector3 and "table" or "Vector3",
+	TargetPosition = "table",
 	Optional = {
 		LoopDelay = "number",
 		TweenInfo = "table",
@@ -11,14 +11,14 @@ module.TypeChecker = {
 	},
 }
 
-function module.Init(partReference, partData)
-	local TweenTT = TweenService:Create(part, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.Duration), {
-		Position = FFlags.FFlagUsePartInstanceOverVector3 and partData.TargetPosition.Position or partData.TargetPosition,
+function module.Boot(partReference, partData)
+	local TweenTT = TweenService:Create(partReference, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.Duration), {
+		Position = partData.TargetPosition.Position or partData.TargetPosition,
 	})
 	local TweenTO = TweenService:Create(
-		part,
+		partReference,
 		partData.TweenOut or partData.TweenInfo or TweenInfo.new(partData.Duration),
-		{ Position = part.Position }
+		{ Position = partReference.Position }
 	)
 
 	task.defer(function()
@@ -33,6 +33,5 @@ function module.Init(partReference, partData)
 		end
 	end)
 end
-function module.Thread(dt) end
 
 return module

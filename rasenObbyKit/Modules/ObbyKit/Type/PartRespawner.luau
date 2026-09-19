@@ -6,7 +6,7 @@ module.Packages = {
 	TempStorage = "TempStorage",
 }
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
 	local ts = module.Packages.TempStorage
 	partReference.Touched:Connect(function(hit)
 		local dir = ts.GetClass("Pushables")[hit._id]

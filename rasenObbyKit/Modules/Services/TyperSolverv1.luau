@@ -1,7 +1,10 @@
 local module = {}
+module.Packages = {
+    FFlags = "FFlags"
+}
 module.Rules = {}
 
-function module.CheckValue(value, expectedType)
+local function CheckValue(value, expectedType)
 	if typeof(expectedType) == "function" then
 		return expectedType(value)
 	end
@@ -13,9 +16,9 @@ function module.CheckValue(value, expectedType)
 	return false
 end
 
-function module.ValidateClass(className, object, data, rules)
+local function ValidateClass(className, object, data, rules)
 	if not rules then
-		LOGF("warn", `Unknown class: "{className}"`)
+		print(`[TypeSolver/WARN]: Unknown class: "{className}"`)
 		return false
 	end
 
@@ -29,18 +32,12 @@ function module.ValidateClass(className, object, data, rules)
 			local value = data[propertyName]
 
 			if value == nil then
-				LOGF(
-					"warn",
-					`[{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`
-				)
+				print(`[TypeSolver/WARN] [{className}][{object.Name}]: missing required property "{propertyName}", or value got is invalid/non-existent: 'nil'`)
 				return false
 			end
 
 			if not CheckValue(value, expectedType) then
-				LOGF(
-					"warn",
-					`[{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`
-				)
+				print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`)
 				return false
 			end
 		end
@@ -52,10 +49,7 @@ function module.ValidateClass(className, object, data, rules)
 
 			if expectedType then
 				if not CheckValue(value, expectedType) then
-					LOGF(
-						"warn",
-						`[{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`
-					)
+					print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(value)}`)
 					return false
 				end
 			end
@@ -71,20 +65,13 @@ function module.ValidateClass(className, object, data, rules)
 					local value = data[dependencyName]
 
 					if value == nil then
-						LOGF(
-							"warn",
-							`[{className}][{object.Name}]: "{dependencyName}" is required when "{propertyName}" is set`
-						)
+						print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" is required when "{propertyName}" is set`)
 						return false
 					end
 
 					if not CheckValue(value, expectedType) then
-						LOGF(
-							"warn",
-							`[{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {typeof(
-								value
-							)}`
-						)
+						print(`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {typeof(value
+)}`)
 						return false
 					end
 				end
@@ -92,7 +79,7 @@ function module.ValidateClass(className, object, data, rules)
 		end
 	end
 
-	if SCLI_CONFIGS.FFlagsEditor.FFlagEnableWarningOnExtraProperties then
+	if module.Packages.FFlags.FFlagEnableWarningOnExtraProperties then
 		for propertyName in pairs(data) do
 			local known = rules[propertyName] or (rules.Optional and rules.Optional[propertyName])
 
@@ -104,12 +91,66 @@ function module.ValidateClass(className, object, data, rules)
 					end
 				end
 			elseif not known then
-				LOGF("warn", `[{className}][{object.Name}]: unknown property "{propertyName}"`)
+				print(`[TypeSolver/WARN] [{className}][{object.Name}]: unknown property "{propertyName}"`)
 			end
 		end
 	end
 
 	return true
+end
+
+function module.TypeSolve(table)
+    for containerClass, containerObjects in pairs(table) do
+		if containerClass ~= "Classes" and containerClass ~= "Types" then
+			continue
+		end
+		
+		for className, classChildren in pairs(containerObjects) do
+			local rules = module.Rules[className]
+			if not rules then
+				print(`[TypeSolver/WARN]: Unknown {containerClass} "{className}"`)
+				continue
+			end
+				
+			if containerClass == "Classes" then
+				for object, data in pairs(classChildren) do
+					if not object:IsA("BasePart") then
+						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: dictionary key must be an BasePart`)
+						
+						table[containerClass][className][object] = nil
+						continue
+					end
+					
+					if typeof(data) ~= "table" then
+						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: configuration for {object.Name} must be a table`
+)
+						
+						SCLI_CONFIGS[containerClass][className][object] = nil
+						continue
+					end
+					
+					local result = ValidateClass(className, object, data, rules)
+					
+					if not result then
+						table[containerClass][className][object] = nil
+					end
+				end
+			elseif containerClass == "Types" then
+				if typeof(classChildren) ~= "table" then
+					print(`[TypeSolver/WARN] [{className}]: type must be an array`)
+					continue
+				end
+				for i = #classChildren, 1, -1 do
+					local object = classChildren[i]
+						
+					if rules.FunctionCheck and not rules.FunctionCheck(object) then
+						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: object failed FunctionCheck`)
+						table.remove(classChildren, i)
+					end
+				end
+			end
+		end
+	end
 end
 
 return module

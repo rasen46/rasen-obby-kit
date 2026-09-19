@@ -12,23 +12,24 @@ module.Packages = {
 	PlayerService = "PlayerService",
 }
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
 	cache[partReference._id] = partData
 
-	if data.AllowPlayer == nil then
-		data.AllowPlayer = true
+	if partData.AllowPlayer == nil then
+		partData.AllowPlayer = true
 	end
 
     local ps = module.Packages.PlayerService
 
-	part.Touched:Connect(function(hit)
-		if data.AllowPlayer and ps.IsPlayerCharacter(hit) then
-			ps.ChangePlayerPivot(
-				FFlags.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame or CFrame.new(data.TargetPosition)
-			)
-		elseif data.AllowParts then
-			hit.CFrame = FFlags.FFlagUsePartInstanceOverVector3 and data.TargetPosition.CFrame
-				or CFrame.new(data.TargetPosition)
+	partReference.Touched:Connect(function(hit)
+		if partData.AllowPlayer and ps.IsPlayerCharacter(hit) then
+			local target = partData.TargetPosition
+			local cf = target.CFrame or CFrame.new(target)
+			
+			ps.Data.CurrentCharacter:PivotTo(cf)
+		elseif partData.AllowParts then
+			hit.CFrame = partData.TargetPosition.CFrame
+				or CFrame.new(partData.TargetPosition)
 		end
 	end)
 end

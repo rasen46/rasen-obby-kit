@@ -12,14 +12,14 @@ module.Packages = {
 	PlayerService = "PlayerService",
 }
 
-function module.Init(partReference, partData)
+function module.Boot(partReference, partData)
 	local active = false
 	local ps = module.Packages.PlayerService
 
 	local jp = partData.Jumppower or 0
 	local ws = partData.Walkspeed or 0
 
-	part.Touched:Connect(function(hit)
+	partReference.Touched:Connect(function(hit)
 		if active then
 			return
 		end
@@ -39,3 +39,5 @@ function module.Init(partReference, partData)
 		end
 	end)
 end
+
+return module
