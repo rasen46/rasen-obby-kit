@@ -1,12 +1,10 @@
--- ported from old, might need rewrite later
-
 local UIS = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local noclip = false
-local speed = 50
+local targetPosition
 
 local keys = {
 	W = false,
@@ -44,12 +42,12 @@ function module.Init()
 		if keyEvent == "Noclip" then
 			noclip = not noclip
 			if CC.DCLI_CONFIGS.VALUES.NoclipConfig.StopPlayerService then
-			    PS.Data.ShouldUpdatePlayerPivot = not noclip
+				PS.Data.ShouldUpdatePlayerPivot = not noclip
 			else
-			    PS.Data.ShouldUpdatePlayerPivot = true
+				PS.Data.ShouldUpdatePlayerPivot = true
 			end
 		elseif keyEvent == "NoclipUp" then
-		    keys.up = true
+			keys.up = true
 		elseif keyEvent == "NoclipDown" then
 			keys.down = true
 		end
@@ -62,7 +60,7 @@ function module.Init()
 		if keys[key] ~= nil then
 			keys[key] = false
 		elseif keyEvent == "NoclipUp" then
-		    keys.up = false
+			keys.up = false
 		elseif keyEvent == "NoclipDown" then
 			keys.down = false
 		end
@@ -73,7 +71,7 @@ function module.Init()
 			return
 		end
 
-		local character = PS.Data.CurrentCharacter
+		local character = player.Character
 		if not character then
 			return
 		end
@@ -83,42 +81,44 @@ function module.Init()
 		local right = Vector3.new(cameraCF.RightVector.X, 0, cameraCF.RightVector.Z)
 
 		if forward.Magnitude > 0 then
-forward = forward.Unit
-end
+			forward = forward.Unit
+		end
 		if right.Magnitude > 0 then
-right = right.Unit
-end
+			right = right.Unit
+		end
 
 		local direction = Vector3.zero
 
 		if keys.W then
-direction += forward
-end
+			direction += forward
+		end
 		if keys.S then
-direction -= forward
-end
+			direction -= forward
+		end
 		if keys.D then
-direction += right
-end
+			direction += right
+		end
 		if keys.A then
-direction -= right
-end
-		
-		if keys.up then
-direction += Vector3.yAxis
-end
-		if keys.down then
-direction -= Vector3.yAxis
-end
-
-		if direction.Magnitude > 0 then
-		    direction = direction.Unit
+			direction -= right
 		end
 
-		local pivot = character:GetPivot()
-		local newPosition = pivot.Position + direction * speed * dt
-		
-		character:PivotTo(CFrame.lookAt(newPosition, newPosition + forward))
+		if keys.up then
+			direction += Vector3.yAxis
+		end
+		if keys.down then
+			direction -= Vector3.yAxis
+		end
+
+		if direction.Magnitude > 0 then
+			direction = direction.Unit
+		end
+
+		local pivot = targetPosition
+		local newPosition = pivot.Position + direction * Configuration.NC.Speed * dt
+		local final = CFrame.lookAt(newPosition, newPosition + forward)
+
+		targetPosition = final
+		character:PivotTo(final)
 	end)
 end
 

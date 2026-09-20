@@ -2,8 +2,8 @@
 	Obby Utilities (standalone version)
 	by rasen46
 
-	last update: 9/19/2026
-	v1.0.0
+	last update: 9/20/2026
+	v1.0.1
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -23,6 +23,9 @@ local Configuration = {
 		[Enum.KeyCode.X] = "RemoveLastCheck",
 
 		-- noclip
+		[Enum.KeyCode.M] = "NoclipSlow",
+		[Enum.KeyCode.N] = "NoclipSpeed",
+		[Enum.KeyCode.Comma] = "NoclipSpeedReset",
 		[Enum.KeyCode.One] = "Noclip",
 		[Enum.KeyCode.Space] = "NoclipUp",
 		[Enum.KeyCode.LeftControl] = "NoclipDown",
@@ -38,6 +41,7 @@ local Configuration = {
 
 	NC = {
 		Speed = 50,
+		SpeedIncrement = 5,
 	},
 }
 
@@ -86,7 +90,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 
 	local key = inp.KeyCode.Name
 	local keyEvent = Configuration.KEYBINDS[inp.KeyCode]
-	local CurChar  = player.Character
+	local CurChar = player.Character
 	local charPivot = CurChar:GetPivot()
 
 	print(keyEvent)
@@ -128,8 +132,14 @@ UIS.InputBegan:Connect(function(inp, pro)
 		CheckpointParts[cCount]:Destroy()
 		CheckpointParts[cCount] = nil
 		Checkpoints[cCount] = nil
-		
+
 		cCount -= 1
+	elseif keyEvent == "NoclipSlow" then
+		speed -= Configuration.NoclipSpeedIncrement
+	elseif keyEvent == "NoclipSpeed" then
+		speed += NConfig.NoclipSpeedIncrement
+	elseif keyEvent == "NoclipSpeedReset" then
+		speed = NConfig.NoclipSpeedDefault
 	end
 end)
 
