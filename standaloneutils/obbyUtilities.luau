@@ -93,8 +93,6 @@ UIS.InputBegan:Connect(function(inp, pro)
 	local CurChar = player.Character
 	local charPivot = CurChar:GetPivot()
 
-	print(keyEvent)
-
 	if keys[key] ~= nil then
 		keys[key] = true
 	end
