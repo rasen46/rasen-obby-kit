@@ -14,7 +14,7 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 
 local Configuration = {
-    KEYBINDS = {
+	KEYBINDS = {
 		[Enum.KeyCode.M] = "NoclipSlow",
 		[Enum.KeyCode.N] = "NoclipSpeed",
 		[Enum.KeyCode.B] = "NoclipSpeedReset",
@@ -22,11 +22,11 @@ local Configuration = {
 		[Enum.KeyCode.Space] = "NoclipUp",
 		[Enum.KeyCode.LeftControl] = "NoclipDown",
 	},
-	
+
 	NC = {
 		NoclipSpeedDefault = 50,
 		NoclipSpeedIncrement = 5,
-	}
+	},
 }
 
 local keys = {
@@ -39,8 +39,7 @@ local keys = {
 }
 
 local targetPosition
-local speed
-= Configuration.NC.NoclipSpeedDefault
+local speed = Configuration.NC.NoclipSpeedDefault
 local noclip = false
 
 local camera = Workspace.CurrentCamera
@@ -60,7 +59,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 	if keyEvent == "Noclip" then
 		noclip = not noclip
 		if noclip then
-		    targetPosition = player.Character:GetPivot()
+			targetPosition = player.Character:GetPivot()
 		end
 	elseif keyEvent == "NoclipUp" then
 		keys.up = true
@@ -73,6 +72,8 @@ UIS.InputBegan:Connect(function(inp, pro)
 	elseif keyEvent == "NoclipSpeedReset" then
 		speed = Configuration.NC.NoclipSpeedDefault
 	end
+
+	speed = math.max(0, speed)
 end)
 
 UIS.InputEnded:Connect(function(inp)
@@ -81,7 +82,7 @@ UIS.InputEnded:Connect(function(inp)
 
 	if keys[key] ~= nil then
 		keys[key] = false
-	elseif keyEvent == "NoclipUp" then 
+	elseif keyEvent == "NoclipUp" then
 		keys.up = false
 	elseif keyEvent == "NoclipDown" then
 		keys.down = false
@@ -137,8 +138,8 @@ RunService.Heartbeat:Connect(function(dt)
 
 	local pivot = targetPosition
 	local newPosition = pivot.Position + direction * speed * dt
-	local final = CFrame.lookAt(newPosition, newPosition + forward) 
-	
+	local final = CFrame.lookAt(newPosition, newPosition + forward)
+
 	targetPosition = final
 	character:PivotTo(final)
 end)
