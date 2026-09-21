@@ -2,8 +2,8 @@
 	Obby Utilities (standalone version)
 	by rasen46
 
-	last update: 9/20/2026
-	v1.0.1
+	last update: 9/21/2026
+	v1.0.2
 ]]
 
 local UIS = game:GetService("UserInputService")
