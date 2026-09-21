@@ -40,9 +40,9 @@ local Configuration = {
 	},
 
 	NC = {
-		Speed = 50,
-		SpeedIncrement = 5,
-	},
+		NoclipSpeedDefault = 50,
+		NoclipSpeedIncrement = 5,
+	}
 }
 
 local keys = {
@@ -55,6 +55,7 @@ local keys = {
 }
 
 local noclip = false
+local speed = Configuration.NC.NoclipSpeedDefault
 local targetPosition
 
 local cCount = 0
@@ -133,12 +134,14 @@ UIS.InputBegan:Connect(function(inp, pro)
 
 		cCount -= 1
 	elseif keyEvent == "NoclipSlow" then
-		speed -= Configuration.NoclipSpeedIncrement
+		speed -= Configuration.NC.NoclipSpeedIncrement
 	elseif keyEvent == "NoclipSpeed" then
-		speed += NConfig.NoclipSpeedIncrement
+		speed += Configuration.NC.NoclipSpeedIncrement
 	elseif keyEvent == "NoclipSpeedReset" then
-		speed = NConfig.NoclipSpeedDefault
+		speed = Configuration.NC.NoclipSpeedDefault
 	end
+
+	speed = math.max(0,speed)
 end)
 
 UIS.InputEnded:Connect(function(inp)
@@ -202,7 +205,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 
 	local pivot = targetPosition
-	local newPosition = pivot.Position + direction * Configuration.NC.Speed * dt
+	local newPosition = pivot.Position + direction * speed * dt
 	local final = CFrame.lookAt(newPosition, newPosition + forward)
 
 	targetPosition = final
