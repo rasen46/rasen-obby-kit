@@ -53,7 +53,7 @@ Most of the documentation is already shown inside the `rasenObbyKit.luau` file a
 - Noclip (temu edition)
 
 ## Road Map
-|-|Coming in 0.4.1|Waiting for Studio updates|
+|-|Coming in 0.4.X|Waiting for Studio updates|
 |-|-|-|
 |PartRespawner (Type)|yes|no|
 |IsPushable (Type)|yes|no|
