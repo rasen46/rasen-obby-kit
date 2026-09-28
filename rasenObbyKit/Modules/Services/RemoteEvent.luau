@@ -23,7 +23,7 @@ local module = {
 }
 
 function module.fireBindable(binName, ...)
-	local bin = module.Binables[binName]
+	local bin = module.BindableEvents[binName]
 
 	if bin then
 		local Connect = bin.Connect
@@ -38,9 +38,8 @@ function module.fireBindable(binName, ...)
 		end
 
 		table.clear(bin.Once)
+		table.clear(bin.Wait)
 	end
 end
-
-function module.Instance()
 
 return module

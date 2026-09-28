@@ -1,0 +1,7 @@
+{
+    "luau-lsp.platform.type": "standard",
+    "luau-lsp.types.definitionFiles": {
+        "vortex": "c:\\Users\\rasen46\\.vscode-oss\\extensions\\arbuzyonak.vortex-luau-0.3.1\\defs\\globalTypes.d.luau"
+    },
+    "luau-lsp.studioPlugin.enabled": true
+}
