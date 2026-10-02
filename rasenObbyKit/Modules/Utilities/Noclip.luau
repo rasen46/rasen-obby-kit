@@ -85,7 +85,7 @@ function module.Init()
 			return
 		end
 
-		local character = PS.Data.CurrentCharacter
+		local character = player.Character
 		if not character then
 			return
 		end

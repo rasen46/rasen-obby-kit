@@ -61,6 +61,10 @@ Most of the documentation is already shown inside the `rasenObbyKit.luau` file a
 - Alljumper
 - Noclip (temu edition)
 
+### Additional utilities
+- Alljumper
+- Noclip (temu edition)
+
 ## Road Map
 
 | -                    | Coming in 0.4.X | Waiting for Studio updates |
