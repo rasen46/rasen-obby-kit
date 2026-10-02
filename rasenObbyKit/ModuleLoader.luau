@@ -1,3 +1,9 @@
+--[[
+pooretx loader v1.4 (modified)
+
+]]
+
+
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -48,7 +54,6 @@ local function requireDescendants(container)
 end
 
 function Loader.LoadAll()
-	print("[Loader/INFO]: rasen46 module loader v1.3 (pooretx edition)")
 	requireDescendants(script.Modules)
 end
 

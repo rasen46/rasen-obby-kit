@@ -2,8 +2,8 @@
 	Noclip Utility (standalone version)
 	by rasen46
 
-	last update: 9/19/2026
-	v1.0.0
+	last update: 10/2/2026
+	v1.0.1
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -15,8 +15,8 @@ local player = Players.LocalPlayer
 
 local Configuration = {
 	KEYBINDS = {
-		[Enum.KeyCode.M] = "NoclipSlow",
-		[Enum.KeyCode.N] = "NoclipSpeed",
+		[Enum.KeyCode.N] = "NoclipSlow",
+		[Enum.KeyCode.M] = "NoclipSpeed",
 		[Enum.KeyCode.B] = "NoclipSpeedReset",
 		[Enum.KeyCode.One] = "Noclip",
 		[Enum.KeyCode.Space] = "NoclipUp",
@@ -142,4 +142,5 @@ RunService.Heartbeat:Connect(function(dt)
 
 	targetPosition = final
 	character:PivotTo(final)
+	character.Velocity = Vector3.new(0, 1, 0)
 end)

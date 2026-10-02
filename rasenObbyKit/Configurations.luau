@@ -2,10 +2,15 @@
 
 local configs = {
 	KEYBINDS = { -- Keybinds for actions, just change the letter after 'KeyCode.' to the capitalized key you want
-		[Enum.KeyCode.F]   = "SetCheckpoint",
-		[Enum.KeyCode.R]   = "GoToLatestCheckpoint",
-		[Enum.KeyCode.X]   = "RemoveLatestCheckpoint",
-		[Enum.KeyCode.T]   = "QuickReset",
+		[Enum.KeyCode.F] = "SetCheckpoint",
+		[Enum.KeyCode.R] = "GoToLatestCheckpoint",
+		[Enum.KeyCode.X] = "RemoveLatestCheckpoint",
+		
+		[Enum.KeyCode.T] = "QuickReset",
+		
+		[Enum.KeyCode.M] = "NoclipSlow",
+		[Enum.KeyCode.N] = "NoclipSpeed",
+		[Enum.KeyCode.Comma]       = "NoclipSpeedReset",
 		[Enum.KeyCode.One]         = "Noclip",
 		[Enum.KeyCode.Space]       = "NoclipUp",
 		[Enum.KeyCode.LeftControl] = "NoclipDown"
@@ -25,7 +30,9 @@ local configs = {
 			Size           = Vector3.new(0.25, 0.25, 0.25), -- Sets the size of the position indicators
 		},
 		NoclipConfig = {
-		    StopPlayerService = true -- Toggles if conveyors and standables should alter your movement when noclipping (excludes teleporters)
+		    StopPlayerService  = true, -- Toggles if conveyors and standables should alter your movement when noclipping (excludes teleporters)
+			NoclipSpeedDefault = 50,   -- Sets the default speed of noclip
+			NoclipSpeedIncrement = 5   -- Sets the increment for changing speed of the noclip
 		}
 	},
 }

@@ -2,8 +2,8 @@
 	Alljump Utility (standalone version)
 	by rasen46
 
-	last update: 9/19/2026
-	v1.0.0
+	last update: 10/2/2026
+	v1.0.1
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -58,12 +58,12 @@ UIS.InputBegan:Connect(function(inp, pro)
 	if keyEvent then
 		if keyEvent == "SetCheckpoint" then
 			cCount += 1
-            
+
 			local n = createAJPart()
 			n.CFrame = Configuration.AJ.CentertoHRP and (charPivot + CFrame.new(0, 2.5, 0)) or charPivot
 
 			CheckpointParts[cCount] = n
-			Checkpoints[cCount] = charPivot
+			Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurCharacter.Velocity }
 		elseif keyEvent == "GoToLastCheck" then
 			local data = Checkpoints[cCount] or spawnLocation.CFrame
 
@@ -71,7 +71,8 @@ UIS.InputBegan:Connect(function(inp, pro)
 				return
 			end
 
-			CurCharacter:PivotTo(data)
+			CurCharacter:PivotTo(data.Pivot)
+			CurCharacter.Velocity = data.Velocity
 		elseif keyEvent == "RemoveLastCheck" then
 			if not Checkpoints[cCount] then
 				return

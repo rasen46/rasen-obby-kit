@@ -4,13 +4,30 @@ module.Packages = {
 }
 module.Rules = {}
 
+local function getObjectDataType(value)
+	local t = typeof(value)
+	if t == "table" then
+		if value.X or value.x then
+			if value.qx then
+				return "CFrame"
+			end
+			return "Vector3"
+		elseif value._id then
+			return "Instance"
+		else
+			return t
+		end
+	end
+	return t
+end
+
 local function CheckValue(value, expectedType)
 	if typeof(expectedType) == "function" then
-		return expectedType(value)
+		return getObjectDataType(value)
 	end
 
 	if typeof(expectedType) == "string" then
-		return typeof(value) == expectedType
+		return getObjectDataType(value) == expectedType
 	end
 
 	return false
@@ -40,7 +57,7 @@ local function ValidateClass(className, object, data, rules)
 
 			if not CheckValue(value, expectedType) then
 				print(
-					`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(
+					`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {getObjectDataType(
 						value
 					)}`
 				)
@@ -56,7 +73,7 @@ local function ValidateClass(className, object, data, rules)
 			if expectedType then
 				if not CheckValue(value, expectedType) then
 					print(
-						`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {typeof(
+						`[TypeSolver/WARN] [{className}][{object.Name}]: "{propertyName}" expected {expectedType}, got {getObjectDataType(
 							value
 						)}`
 					)
@@ -83,7 +100,7 @@ local function ValidateClass(className, object, data, rules)
 
 					if not CheckValue(value, expectedType) then
 						print(
-							`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {typeof(
+							`[TypeSolver/WARN] [{className}][{object.Name}]: "{dependencyName}" expected {expectedType}, got {getObjectDataType(
 								value
 							)}`
 						)
@@ -115,6 +132,7 @@ local function ValidateClass(className, object, data, rules)
 end
 
 function module.TypeSolve(table)
+	local throwError = false
 	for containerClass, containerObjects in pairs(table) do
 		if containerClass ~= "Classes" and containerClass ~= "Types" then
 			continue
@@ -124,6 +142,7 @@ function module.TypeSolve(table)
 			local rules = module.Rules[className]
 			if not rules then
 				print(`[TypeSolver/WARN]: Unknown {containerClass} "{className}"`)
+				throwError = true
 				continue
 			end
 
@@ -132,7 +151,7 @@ function module.TypeSolve(table)
 					if not object:IsA("BasePart") then
 						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: dictionary key must be an BasePart`)
 
-						table[containerClass][className][object] = nil
+						throwError = true
 						continue
 					end
 
@@ -141,19 +160,20 @@ function module.TypeSolve(table)
 							`[TypeSolver/WARN] [{className}] [{object.Name}]: configuration for {object.Name} must be a table`
 						)
 
-						SCLI_CONFIGS[containerClass][className][object] = nil
+						throwError = true
 						continue
 					end
 
 					local result = ValidateClass(className, object, data, rules)
 
 					if not result then
-						table[containerClass][className][object] = nil
+						throwError = true
 					end
 				end
 			elseif containerClass == "Types" then
 				if typeof(classChildren) ~= "table" then
 					print(`[TypeSolver/WARN] [{className}]: type must be an array`)
+					throwError = true
 					continue
 				end
 				for i = #classChildren, 1, -1 do
@@ -161,11 +181,15 @@ function module.TypeSolve(table)
 
 					if rules.FunctionCheck and not rules.FunctionCheck(object) then
 						print(`[TypeSolver/WARN] [{className}] [{object.Name}]: object failed FunctionCheck`)
-						table.remove(classChildren, i)
+						throwError = true
 					end
 				end
 			end
 		end
+	end
+
+	if throwError then
+		error("an error was found in obby data, stopping engine")
 	end
 end
 

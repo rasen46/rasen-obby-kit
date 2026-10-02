@@ -52,14 +52,15 @@ function module.Init()
 					n.CFrame = CC.DCLI_CONFIGS.VALUES.AllJumpConfig.CentertoHRP and (charPivot + CFrame.new(0, 2.5, 0))
 						or charPivot
 					CheckpointParts[cCount] = n
-					Checkpoints[cCount] = charPivot
+					Checkpoints[cCount] = { Pivot = charPivot, Velocity = playerCharacter.Velocity }
 				elseif keyEvent == "GoToLatestCheckpoint" then
 					local data = Checkpoints[cCount] or spawnLocation.CFrame
 					if not data then
 						return
 					end
 
-					playerCharacter:PivotTo(data)
+					playerCharacter:PivotTo(data.Pivot)
+					playerCharacter.Velocity = data.Velocity
 				elseif keyEvent == "RemoveLatestCheckpoint" then
 					if not Checkpoints[cCount] then
 						return

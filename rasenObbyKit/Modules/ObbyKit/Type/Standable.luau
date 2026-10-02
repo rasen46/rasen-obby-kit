@@ -1,4 +1,4 @@
-local currentTouchedStandable = nil
+local currentStandableId = nil
 local lastCf = nil
 
 local Standable = {}
@@ -6,6 +6,10 @@ local module = {}
 
 module.Packages = {
 	PlayerService = "PlayerService",
+}
+
+module.Options = {
+	ThreadPriority = -5,
 }
 
 module.TypeChecker = {
@@ -23,30 +27,28 @@ function module.Thread(dt)
 
 	local rayResult = PS.StandingOn()
 	local instance = rayResult and rayResult.Instance
+	local standableId = instance and instance._id
 
-	local standable = instance and Standable[instance._id] and instance or nil
-
-	local standableId = standable and standable._id
-	local currentId = currentTouchedStandable and currentTouchedStandable._id
-
-	if standableId ~= currentId then
-		currentTouchedStandable = standable
-		lastCf = standable and standable.CFrame or nil
+	if not standableId or not Standable[standableId] then
+		standableId = nil
+		instance = nil
+	end
+	
+	if standableId ~= currentStandableId then
+		currentStandableId = standableId
+		lastCf = instance and instance.CFrame or nil
 		return
 	end
 
-	if not currentTouchedStandable or not lastCf then
+	if not instance or not lastCf then
 		return
 	end
 
-	local currentCf = currentTouchedStandable.CFrame
-	local playerCf = PS.GetPlayerCurrentPivot()
+	local currentCf = instance.CFrame
+	local playerCf = PS.Data.playerNextPivot
+	local relativePlayerCf = lastCf:ToObjectSpace(playerCf)
 
-	local delta = currentCf * lastCf:Inverse()
-	local newCf = delta * playerCf
-
-	PS.ChangePlayerPivot(newCf)
-
+	PS.Data.playerNextPivot = currentCf:ToWorldSpace(relativePlayerCf)
 	lastCf = currentCf
 end
 

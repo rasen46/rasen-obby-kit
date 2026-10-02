@@ -9,6 +9,10 @@ module.Packages = {
 	PlayerService = "PlayerService",
 }
 
+module.Options = {
+	ThreadPriority = -4,
+}
+
 function module.Boot(partReference, partData)
 	local ps = module.Packages.PlayerService
 	cache[partReference] = {
@@ -33,17 +37,21 @@ end
 
 function module.Thread(dt)
 	local PS = module.Packages.PlayerService
+
 	for part, data in pairs(cache) do
 		if not data.Active then
 			continue
 		end
-		local currentPiv = PS.GetPlayerCurrentPivot()
+
+		local velocity
 
 		if data.BasedOnRotation then
-			PS.ChangePlayerPivot(currentPiv + part.CFrame.LookVector * data.BaseSpeed * dt)
+			velocity = part.CFrame.LookVector * data.BaseSpeed
 		else
-			PS.ChangePlayerPivot(currentPiv + data.Direction * dt)
+			velocity = data.Direction
 		end
+
+		PS.AddPlayerVelocity(velocity)
 	end
 end
 

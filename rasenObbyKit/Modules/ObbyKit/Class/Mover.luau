@@ -1,7 +1,7 @@
 local module = {}
 local cache = {}
 module.TypeChecker = {
-	TargetPosition = "table",
+	TargetPosition = "Instance",
 	Optional = {
 		LoopDelay = "number",
 		TweenInfo = "table",

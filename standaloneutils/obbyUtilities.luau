@@ -23,9 +23,9 @@ local Configuration = {
 		[Enum.KeyCode.X] = "RemoveLastCheck",
 
 		-- noclip
-		[Enum.KeyCode.M] = "NoclipSlow",
-		[Enum.KeyCode.N] = "NoclipSpeed",
-		[Enum.KeyCode.Comma] = "NoclipSpeedReset",
+		[Enum.KeyCode.N] = "NoclipSlow",
+		[Enum.KeyCode.M] = "NoclipSpeed",
+		[Enum.KeyCode.B] = "NoclipSpeedReset",
 		[Enum.KeyCode.One] = "Noclip",
 		[Enum.KeyCode.Space] = "NoclipUp",
 		[Enum.KeyCode.LeftControl] = "NoclipDown",
@@ -114,7 +114,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 		n.CFrame = Configuration.AJ.CentertoHRP and (charPivot + CFrame.new(0, 2.5, 0)) or charPivot
 
 		CheckpointParts[cCount] = n
-		Checkpoints[cCount] = charPivot
+		Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurCharacter.Velocity }
 	elseif keyEvent == "GoToLastCheck" then
 		local data = Checkpoints[cCount] or spawnLocation.CFrame
 
@@ -122,7 +122,8 @@ UIS.InputBegan:Connect(function(inp, pro)
 			return
 		end
 
-		CurChar:PivotTo(data)
+		CurCharacter:PivotTo(data.Pivot)
+		CurCharacter.Velocity = data.Velocity
 	elseif keyEvent == "RemoveLastCheck" then
 		if not Checkpoints[cCount] then
 			return
@@ -210,4 +211,5 @@ RunService.Heartbeat:Connect(function(dt)
 
 	targetPosition = final
 	character:PivotTo(final)
+    character.Velocity = Vector3.new(0,1,0)
 end)

@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local noclip = false
+local speed = 50
 local targetPosition
 
 local keys = {
@@ -34,6 +35,7 @@ function module.Init()
 
 		local key = inp.KeyCode.Name
 		local keyEvent = CC.DCLI_CONFIGS.KEYBINDS[inp.KeyCode]
+		local NConfig = CC.DCLI_CONFIGS.VALUES.NoclipConfig
 
 		if keys[key] ~= nil then
 			keys[key] = true
@@ -41,6 +43,10 @@ function module.Init()
 
 		if keyEvent == "Noclip" then
 			noclip = not noclip
+			if noclip then
+				targetPosition = PS.Data.CurrentCharacter:GetPivot()
+			end
+
 			if CC.DCLI_CONFIGS.VALUES.NoclipConfig.StopPlayerService then
 				PS.Data.ShouldUpdatePlayerPivot = not noclip
 			else
@@ -50,7 +56,15 @@ function module.Init()
 			keys.up = true
 		elseif keyEvent == "NoclipDown" then
 			keys.down = true
+		elseif keyEvent == "NoclipSlow" then
+			speed -= NConfig.NoclipSpeedIncrement
+		elseif keyEvent == "NoclipSpeed" then
+			speed += NConfig.NoclipSpeedIncrement
+		elseif keyEvent == "NoclipSpeedReset" then
+			speed = NConfig.NoclipSpeedDefault
 		end
+
+		speed = math.max(0, speed)
 	end)
 
 	UIS.InputEnded:Connect(function(inp)
@@ -114,11 +128,12 @@ function module.Init()
 		end
 
 		local pivot = targetPosition
-		local newPosition = pivot.Position + direction * Configuration.NC.Speed * dt
+		local newPosition = pivot.Position + direction * speed * dt
 		local final = CFrame.lookAt(newPosition, newPosition + forward)
 
 		targetPosition = final
 		character:PivotTo(final)
+		character.Velocity = Vector3.new(0, 0, 0)
 	end)
 end
 
