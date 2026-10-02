@@ -7,14 +7,14 @@ module.TypeChecker = {
 
 module.Packages = {
 	PlayerService = "PlayerService",
-	RemoteEvent = "RemoteEvent",
+	Event = "Event",
 }
 
 function module.Boot(_, partReference)
 	local PS = module.Packages.PlayerService
-	local RE = module.Packages.RemoteEvent
+	local E = module.Packages.Event
 
-	local plrEvent = RE.PlayerEvent
+	local plrEvent = E.Remotes.PlayerEvent
 
 	if not plrEvent then
 		return

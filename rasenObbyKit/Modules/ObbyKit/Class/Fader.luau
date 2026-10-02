@@ -11,7 +11,7 @@ module.TypeChecker = {
 		AllowParts = "boolean",
 		AllowPlayer = "boolean",
 		ConnectOnTrigger = "function",
-		TargetPosition = "table",
+		TargetPosition = "Instance",
 		TweenInfo = "table",
 		TweenOut = "table",
 		TweenIn = "table",
@@ -28,13 +28,7 @@ function module.Boot(partReference, partData)
 	local originalTransparency = partReference.Transparency
 	local origin = partReference.Position
 
-	local targetPosition = partData.TargetPosition
-
-	if typeof(targetPosition) == "Instance" and targetPosition:IsA("BasePart") then
-		targetPosition = targetPosition.Position
-	end
-
-	targetPosition = targetPosition or origin
+	local targetPosition = partData.TargetPosition and partData.TargetPosition.Position or origin
 
 	local TweenTT = TweenService:Create(
 		partReference,

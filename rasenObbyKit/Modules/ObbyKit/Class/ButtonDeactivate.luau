@@ -1,7 +1,7 @@
 local module = {}
 
 module.TypeChecker = {
-	ButtonToDeactivate = "table",
+	ButtonToDeactivate = "Instance",
 	Optional = {
 		ActivateOnHumanoid = "boolean",
 		ActivateOnPart = "boolean",

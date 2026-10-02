@@ -6,6 +6,7 @@ local module = {
 	["FFlagDisableClientSideObjects"] = false,
 	["FFlagEnableTypeCheckerExperiment"] = true,
 	["FFlagEnableWarningOnExtraProperties"] = true,
+	["FFlagEnableDebugParts"] = false,
 }
 
 return module

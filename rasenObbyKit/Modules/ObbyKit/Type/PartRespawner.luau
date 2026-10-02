@@ -8,6 +8,10 @@ module.Packages = {
 
 function module.Boot(partReference, partData)
 	local ts = module.Packages.TempStorage
+	if not ts.GetClass("Pushables") then
+		ts.AddClass("Pushables")
+	end
+
 	partReference.Touched:Connect(function(hit)
 		local dir = ts.GetClass("Pushables")[hit._id]
 

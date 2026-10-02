@@ -136,6 +136,25 @@ local obbyData = {
 			}
 			]]
         },
+		Summoner = {
+			--[[
+			[Workspace.SummonerPart] = {
+				Spawned = { -- you can add any property of a part within this
+					Anchored = false,
+					Size = Vector3.new(4,4,4),
+					Transparency = 0.2,
+				},
+				TargetPosition = Workspace.SummonerTarget, -- sets the position of where the part should spawn at
+				Duration = 3, -- sets the amount of time for it to take for the block to despawn, optional, default 0, set to 0 for never
+				ShowPreview = true, -- sets if a ghost version of the block shows or not, optional, default false
+				PreviewTransparency = 0.5, -- sets the transparency of the ghost block, optional, default 0.5
+				ActivateOnHumanoid = true, -- sets if the summoner can active when touched by players, optional, default true
+				ActivateOnPart = false, -- sets if the summoner can active if a part touches it, optional, default false
+
+			}
+			]]
+
+		},
 
 		-- V ANYTHING BELOW THIS IS NOT EXPECTED TO WORK 100% OF THE TIME DUE TO STUDIO UPDATES BREAKING AND FIXING THINGS AND CHANGES TO PART PROPERTIES V
 		Damager = { -- [REQUIRES SERVER]
@@ -173,6 +192,20 @@ local obbyData = {
 					[2] = {Workspace.BeatPart1, Workspace.BeatPart2}
 				}
 			}
+			]]
+		},
+		Weld = { -- makes parts move together when root is moved
+			--[[
+			workspace.Model -- should have a part named PrimaryPart within it
+			]]
+			--[[
+			["group1"] = { -- manual weld creation
+				PrimaryPart = workspace.PrimPart1, -- sets the primary part of the weld
+				Parts = { -- do not refer the primary part within this
+					workspace.Part1,
+					workspace.Part2, -- add as many parts u want in here, just separate them with commas
+				},
+			},
 			]]
 		},
 	},

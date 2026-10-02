@@ -1,49 +1,76 @@
 # rasen-obby-kit
+
 a client-side object handler for a game named "Vortex"
 
 ## Installation
-1. Get the `rasenObbyKit.luau` file from `github.com/rasen46/rasen-obby-kit/releases` OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenObbyKit.luau`
-2. Get the `rasenServerSide.luau` file from `github.com/rasen46/rasen-obby-kit/releases` as well, OR get the raw text from `github.com/rasen46/rasen-obby-kit/blob/main/rasenServerSide.luau`
-3. Create a new `LocalScript` under `StarterPlayerScripts` (this script can be named whatever you want it to be)
-4. Create a new `Script` under `ServerScriptService` (this script can be also named whatever you want it to be)
-5. Paste the contents of `rasenObbyKit.luau` into the `LocalScript` you just created
-6.  Paste the contents of `rasenServerSide.luau` into the `Script` you just created
-7.  And you're done; you can edit CO inside the `LocalScript` you just made under `SCLI_CONFIGS`
+
+1. Get the place file from `places`, you can either choose from `obbyutils.vrtx` which has premade client side objects or get `obbyutilsBlank.vrtx` which has none
+2. And you're done (im hoping that Halo adds a way to export models soon, as this method of installation is not very efficient)
+
+OR
+
+1. Get the place file from `places`, specifically `obbyutilsBlank.vrtx`
+2. Copy the `rasenObbyKit` local script from `StarterPlayerScripts`
+3. Close the place
+4. Open the place you want to have the kit in
+5. Paste it inside `StarterPlayerScripts`
+6. Do the same for the `rasenServerSide` script inside `ServerScriptService` and put it inside `ServerScriptService` instead of `StarterPlayerScripts`
+7. Make a RemoteEvent inside ReplicatedStorage and name it specifically `rOK_PlayerEvent` (this is so it won't interfere with other remotes if u have any)
+8. And you're done!
 
 ## Updating or downgrading the kit
-You can simply transfer the `SCLI_CONFIGS` from your current kit to the one you want to use
+
+### Refer to the second install option if updating\*
+
+You can simply transfer the `obbydata` from your current kit to the one you want to use
 
 or in a somewhat more detailed explaination...
 
-The way I would recommend to update/downgrade your kit is by first getting the kit you want, then deleting the `SCLI_CONFIGS` table from the kit you just got from it and replacing it with the `SCLI_CONFIGS` from the old kit you were using
+The way I would recommend to update/downgrade your kit is by first getting the kit you want, then deleting the `obbydata` table from the kit you just got from it and replacing it with the `obbydata` from the old kit you were using
+
+to transfer objects from place to place, you can simply select everything from workspace and copy and paste it to another place
 
 ## Documentation
+
 Most of the documentation is already shown inside the `rasenObbyKit.luau` file as comments
 
 ## Features
-This kit current features:
-|-|Object Type|Description|
-|-|-|-|
-|Spinner|Class|Spins a part on any axis|
-|Orbital|Class|Makes a part orbit a target part|
-|Mover|Class|Moves a part back and forth from its original position to a target part|
-|Conveyor|Class|Pushes a player on any axis as long as the player touches the part|
-|Teleporter|Class|Teleports the player to a target position|
-|Damager|Class|Damages the player|
-|Fader|Class|Makes a part fade if touched|
-|Button|Class|Modifies a object's properties or runs a function after being triggered|
-|ButtonDeactivate|Class|Deactivates a button (does not work for now)|
-|PlayerProperties|Class|Changes the properties of the player for an amount of time|
-|Standable|Type|Makes a part able to hold players|
-|Instakill|Type|Instakills the player|
-|BeatBlockGroup|Group|Allows for cycling of part property changes|
+
+### Client/server-side objects
+
+| -                | Object Type | Description                                                             |
+| ---------------- | ----------- | ----------------------------------------------------------------------- |
+| Spinner          | Class       | Spins a part on any axis                                                |
+| Orbital          | Class       | Makes a part orbit a target part                                        |
+| Mover            | Class       | Moves a part back and forth from its original position to a target part |
+| Conveyor         | Class       | Pushes a player on any axis as long as the player touches the part      |
+| Teleporter       | Class       | Teleports the player to a target position                               |
+| Damager          | Class       | Damages the player                                                      |
+| Fader            | Class       | Makes a part fade if touched                                            |
+| Button           | Class       | Modifies a object's properties or runs a function after being triggered |
+| ButtonDeactivate | Class       | Deactivates a button (does not work for now)                            |
+| PlayerProperties | Class       | Changes the properties of the player for an amount of time              |
+| Summoner         | Class       | Creates new parts for players to interact with                          |
+| Standable        | Type        | Makes a part able to hold players                                       |
+| Instakill        | Type        | Instakills the player                                                   |
+| BeatBlockGroup   | Group       | Allows for cycling of part property changes                             |
+| Weld             | Group       | Allows for parts to move together                                       |
+
+### Additional utilities
+
+- Alljumper
+- Noclip (temu edition)
 
 ## Road Map
-|-|Coming in 0.4.0|Waiting for Studio updates|
-|-|-|-|
-|PartRespawner (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
-|IsPushable (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
-|PartReseter (Type)|waiting|yes (waiting for touch events to be able to register nonplayer objects)|
-|LDM Mode (Config)|framework|no|
-|Quick Reset|yes|no|
-|Multi-Obby loading|yes|no|
+
+| -                    | Coming in 0.4.X | Waiting for Studio updates |
+| -------------------- | --------------- | -------------------------- |
+| PartRespawner (Type) | yes             | no                         |
+| IsPushable (Type)    | yes             | no                         |
+| PartReseter (Type)   | yes             | no                         |
+| LDM Mode (Config)    | framework       | no                         |
+| XPusher (Class)      | maybe           | no                         |
+| Vines (Class)        | maybe           | no                         |
+| Ziplines (Group)     | maybe           | no                         |
+| Quick Reset          | maybe           | no                         |
+| Multi-Obby loading   | yes             | no                         |

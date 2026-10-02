@@ -3,8 +3,15 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 
 local module = {}
+
+module.Packages = {
+	Debugger = "Debugger",
+	FFlags = "FFlags",
+}
+
 module.Data = {
 	CurrentCharacter = Character,
+	CurrentVelocity = Character.Velocity,
 	playerNextPivot = Character:GetPivot(),
 	AddedWalkspeed = 0,
 	AddedJumppower = 0,
@@ -19,8 +26,20 @@ function module.ChangePlayerPivot(newPivot)
 	module.Data.playerNextPivot = newPivot
 end
 
-function module.GetPlayerAngVelocity()
-	return module.Data.CurrentCharacter.HumanoidRootPart.AssemblyAngularVelocity
+function module.GetPlayerVelocity()
+	return module.Data.CurrentVelocity
+end
+
+function module.AddPlayerVelocity(vector3)
+	module.Data.CurrentVelocity += vector3
+end
+
+function module.SetPlayerVelocity(vector3)
+	module.Data.CurrentVelocity = vector3
+end
+
+function module.AddPlayerPivotDelta(delta)
+	module.Data.playerNextPivot = delta * module.Data.playerNextPivot
 end
 
 function module.ChangeHumanoidAttributes(attribute, value)
@@ -42,11 +61,20 @@ function module.IsPlayerCharacter(model)
 end
 
 function module.StandingOn()
-	return workspace:Raycast(
-		module.Data.playerNextPivot.Position + Vector3.new(0, -0.25, 0),
-		Vector3.new(0, -0.5, 0),
-		{ module.Data.CurrentCharacter }
-	)
+	local r = workspace:Blockcast(module.Data.playerNextPivot, Vector3.new(2, 2, 1), Vector3.new(0, 0.9, 0), {
+		FilterDescendantsInstances = { module.Data.CurrentCharacter, module.Packages.Debugger.debug },
+		FilterType = 0,
+	})
+
+	if module.Packages.FFlags.FFlagEnableDebugParts then
+		module.Packages.Debugger.CreateDebugPart(0.2, {
+			Size = Vector3.new(2, 2, 1),
+			CFrame = module.Data.playerNextPivot + Vector3.new(0, 0.9, 0),
+			CanCollide = false,
+		})
+	end
+
+	return r
 end
 
 return module

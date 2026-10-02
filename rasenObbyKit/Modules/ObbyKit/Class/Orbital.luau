@@ -1,33 +1,33 @@
 local module = {}
 local cache = {}
+
 module.TypeChecker = {
-	OrbitalOrigin = "table",
-	OrbitalOffset = "number",
+	OrbitalOrigin = "Instance",
+	Distance = "number",
+	Axis = "Vector3",
+
 	Optional = {
 		OrbitalFaceCenter = "boolean",
-		XTilt = "number",
-		YRotation = "number",
-		ZTilt = "number",
-		TiltXOffset = "number",
-		AngleYOffset = "number",
-		TiltZOffset = "number",
+		AxisOffset = "Vector3",
 		Speed = "number",
 	},
 }
 
 function module.Boot(partReference, partData)
-	local origin = partData.OrbitalOrigin
+	local axisOffset = partData.AxisOffset or Vector3.zero
 
 	cache[partReference] = {
 		Angle = 0,
 		Speed = math.rad(partData.Speed or 0),
-		Offset = partData.OrbitalOffset or 0,
-		Origin = origin,
+		Distance = partData.Distance,
+		Origin = partData.OrbitalOrigin,
+
 		OrbitCFrame = CFrame.Angles(
-			math.rad((partData.XTilt or 0) + (partData.TiltXOffset or 0)),
-			math.rad((partData.YRotation or 0) + (partData.AngleYOffset or 0)),
-			math.rad((partData.ZTilt or 0) + (partData.TiltZOffset or 0))
+			math.rad(partData.Axis.X + axisOffset.X),
+			math.rad(partData.Axis.Y + axisOffset.Y),
+			math.rad(partData.Axis.Z + axisOffset.Z)
 		),
+
 		FaceCenter = partData.OrbitalFaceCenter == true,
 	}
 end
@@ -35,8 +35,9 @@ end
 function module.Thread(dt)
 	for part, data in pairs(cache) do
 		data.Angle += data.Speed * dt
+
 		local offset = data.OrbitCFrame:VectorToWorldSpace(
-			Vector3.new(math.cos(data.Angle) * data.Offset, 0, math.sin(data.Angle) * data.Offset)
+			Vector3.new(math.cos(data.Angle) * data.Distance, 0, math.sin(data.Angle) * data.Distance)
 		)
 
 		local position = data.Origin.Position + offset
