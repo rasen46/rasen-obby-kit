@@ -15,8 +15,8 @@ local player = Players.LocalPlayer
 
 local Configuration = {
 	KEYBINDS = {
-		[Enum.KeyCode.M] = "NoclipSlow",
-		[Enum.KeyCode.N] = "NoclipSpeed",
+		[Enum.KeyCode.N] = "NoclipSlow",
+		[Enum.KeyCode.M] = "NoclipSpeed",
 		[Enum.KeyCode.B] = "NoclipSpeedReset",
 		[Enum.KeyCode.One] = "Noclip",
 		[Enum.KeyCode.Space] = "NoclipUp",
