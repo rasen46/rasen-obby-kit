@@ -2,8 +2,8 @@
 	Obby Utilities (standalone version)
 	by rasen46
 
-	last update: 10/4/2026
-	v1.0.3
+	last update: 10/5/2026
+	v1.0.4
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -116,14 +116,15 @@ UIS.InputBegan:Connect(function(inp, pro)
 		CheckpointParts[cCount] = n
 		Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurChar.Velocity }
 	elseif keyEvent == "GoToLastCheck" then
-		local data = Checkpoints[cCount] or spawnLocation.CFrame
+		local data = Checkpoints[cCount] and Checkpoints[cCount].Pivot or spawnCFrame
 
 		if not data then
 			return
 		end
 
-		CurChar:PivotTo(data.Pivot)
+		CurChar:PivotTo(data.Velocity and data.Pivot or data)
 		CurChar.Velocity = data.Velocity
+or Vector3.new(0,0,0)
 	elseif keyEvent == "RemoveLastCheck" then
 		if not Checkpoints[cCount] then
 			return
