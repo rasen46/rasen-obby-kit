@@ -2,8 +2,8 @@
 	Noclip Utility (standalone version)
 	by rasen46
 
-	last update: 10/2/2026
-	v1.0.1
+	last update: 10/11/2026
+	v1.0.2
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -142,5 +142,5 @@ RunService.Heartbeat:Connect(function(dt)
 
 	targetPosition = final
 	character:PivotTo(final)
-	character.Velocity = Vector3.new(0, 1, 0)
+	character.Velocity = Vector3.zero
 end)
