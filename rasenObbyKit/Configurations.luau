@@ -8,9 +8,9 @@ local configs = {
 		
 		[Enum.KeyCode.T] = "QuickReset",
 		
-		[Enum.KeyCode.M] = "NoclipSlow",
-		[Enum.KeyCode.N] = "NoclipSpeed",
-		[Enum.KeyCode.Comma]       = "NoclipSpeedReset",
+		[Enum.KeyCode.N] = "NoclipSlow",
+		[Enum.KeyCode.M] = "NoclipSpeed",
+		[Enum.KeyCode.B] = "NoclipSpeedReset",
 		[Enum.KeyCode.One]         = "Noclip",
 		[Enum.KeyCode.Space]       = "NoclipUp",
 		[Enum.KeyCode.LeftControl] = "NoclipDown"

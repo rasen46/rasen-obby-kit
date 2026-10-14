@@ -85,7 +85,7 @@ function module.Init()
 			return
 		end
 
-		local character = player.Character
+		local character = PS.Data.CurrentCharacter
 		if not character then
 			return
 		end
@@ -133,7 +133,7 @@ function module.Init()
 
 		targetPosition = final
 		character:PivotTo(final)
-		character.Velocity = Vector3.new(0, 0, 0)
+		character.Velocity = Vector3.zero
 	end)
 end
 

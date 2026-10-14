@@ -142,5 +142,5 @@ RunService.Heartbeat:Connect(function(dt)
 
 	targetPosition = final
 	character:PivotTo(final)
-	character.Velocity = Vector3.new(0, 1, 0)
+	character.Velocity = Vector3.zero
 end)

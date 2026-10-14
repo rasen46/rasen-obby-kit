@@ -54,7 +54,7 @@ function module.Init()
 					CheckpointParts[cCount] = n
 					Checkpoints[cCount] = { Pivot = charPivot, Velocity = playerCharacter.Velocity }
 				elseif keyEvent == "GoToLatestCheckpoint" then
-					local data = Checkpoints[cCount] or spawnLocation.CFrame
+					local data = Checkpoints[cCount] or { Pivot = spawnLocation.CFrame, Velocity = Vector3.zero }
 					if not data then
 						return
 					end

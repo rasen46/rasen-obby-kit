@@ -8,7 +8,8 @@
 | $$      |  $$$$$$/| $$ \  $$
 |__/       \______/ |__/  \__/
 rasen's obby kit
-version 0.4.1 beta release
+version 0.4.1 beta release (single obby edition)
+source: https://github.com/rasen46/rasen-obby-kit
 
 please dont strip credits from this
 ]]
@@ -25,12 +26,9 @@ local obbyData = {
             --[[
 			Example Spinner
 			[Workspace.ExampleSpinner] = { -- set the part you want to spin to the name of the part (this example shows a part named 'ExampleSpinner')
-				XAxis = 500,     -- sets how fast it rotates on the X Axis (optional, default 0)
-				YAxis = 20,      -- sets how fast it rotates on the Y Axis (optional, default 0)
-				ZAxis = 390,     -- sets how fast it rotates on the Z Axis (optional, default 0)
-				AngleXOffset = 0,-- sets how offsetted the X Axis from 0 degrees (optional, default 0)
-				AngleYOffset = 0,-- sets how offsetted the Y Axis from 0 degrees (optional, default 0)
-				AngleZOffset = 0,-- sets how offsetted the Z Axis from 0 degrees (optional, default 0)
+				Axis = Vector3.new(0,360,0),  -- sets how fast it rotates on each Axis (x, y, z) (required)
+				Offset = Vector3.new(0,20,0), -- adds on the inital rotation of the spinner (x, y, z) (optional, default Vector3.zero)
+				SpeedMultiplier = 1.5         -- mulitplies the speed the spinner on all axes (optional)
 			}
 			]]
         },
@@ -38,15 +36,11 @@ local obbyData = {
             --[[
 			Example Orbital
 			[Workspace.ExampleOrbital] = { -- set the part you want to orbit around smth to the name of the part (this example shows a part named 'ExampleOrbital')
-				Speed = 500,     -- sets how fast it orbits the origin in degrees/second (optional, default 0)
-				XTilt = 20,      -- sets the tilts of the orbit on the X Axis in degrees (optional, default 0)
-				YRotation = 23,  -- sets the tilts of the orbit on the Y Axis in degrees (optional, default 0)
-				ZTilt = 390,     -- sets the tilts of the orbit on the Z Axis in degrees (optional, default 0)
-				TiltXOffset = 0, -- sets how offsetted the X Axis from 0 degrees (optional, default 0)
-				AngleYOffset = 0,-- sets how offsetted the Y Axis from 0 degrees (optional, default 0)
-				TiltZOffset = 0, -- sets how offsetted the Z Axis from 0 degrees (optional, default 0)
+				Axis = Vector3.new(0,1,0), -- sets the tilts of the orbit axes in degrees (required)
+				Distance = 5,   -- defines how far away the part should orbit around the origin (required)
 				OrbitalOrigin = Workspace.ExampleOrbitOrigin, -- this defines what the part should orbit around, can be a position (required)
-				OrbitalOffset = 5,        -- defines how far away the part should orbit around the origin (required)
+				Speed = 500,    -- sets how fast it orbits the origin in degrees/second (optional, default 0)
+				AxisOffset = 0, -- offsets the orbit axes (optional, default Vector3.zero)
 				OrbitalFaceCenter = true  -- sets if the part should look at the origin when spinning (optional, default false)
 			}
 			]]
