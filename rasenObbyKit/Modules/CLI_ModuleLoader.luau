@@ -1,6 +1,5 @@
 --[[
-pooretx loader v1.4 (modified)
-
+    pooretx loader v1.4 (modified)
 ]]
 
 
@@ -54,7 +53,7 @@ local function requireDescendants(container)
 end
 
 function Loader.LoadAll()
-	requireDescendants(script.Modules)
+	requireDescendants(script.Modules.Client)
 end
 
 function Loader.Init()

@@ -22,16 +22,14 @@ function module.Boot(partReference, partData)
 		Direction = Vector3.new(partData.XAxis or 0, partData.YAxis or 0, partData.ZAxis or 0),
 	}
 
-	partReference.Touched:Connect(function(hit)
-		if ps.IsPlayerCharacter(hit) then
-			cache[partReference].Active = true
-		end
+	local Touched, TouchEnded = ps.SignalOnTouch(partReference)
+
+	Touched.Event:Connect(function()
+		cache[partReference].Active = true
 	end)
 
-	partReference.TouchEnded:Connect(function(hit)
-		if cache[partReference] then
-			cache[partReference].Active = false
-		end
+	TouchEnded.Event:Connect(function()
+		cache[partReference].Active = false
 	end)
 end
 

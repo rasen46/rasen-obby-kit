@@ -12,9 +12,10 @@ module.TypeChecker = {
 }
 
 function module.Boot(partReference, partData)
-	local TweenTT = TweenService:Create(partReference, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.Duration), {
-		Position = partData.TargetPosition.Position or partData.TargetPosition,
-	})
+	local TweenTT =
+		TweenService:Create(partReference, partData.TweenIn or partData.TweenInfo or TweenInfo.new(partData.Duration), {
+			Position = partData.TargetPosition.Position or partData.TargetPosition,
+		})
 	local TweenTO = TweenService:Create(
 		partReference,
 		partData.TweenOut or partData.TweenInfo or TweenInfo.new(partData.Duration),
