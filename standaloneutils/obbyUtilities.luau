@@ -2,8 +2,8 @@
 	Obby Utilities (standalone version)
 	by rasen46
 
-	last update: 10/11/2026
-	v1.0.5
+	last update: 11/22/2026
+	v1.0.6
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -111,20 +111,20 @@ UIS.InputBegan:Connect(function(inp, pro)
 		cCount += 1
 
 		local n = createAJPart()
-		n.CFrame = Configuration.AJ.CentertoHRP and (charPivot + CFrame.new(0, 2.5, 0)) or charPivot
+		n.CFrame = if Configuration.AJ.CentertoHRP then charPivot else (charPivot + Vector3.new(0, 2.5, 0))
 
 		CheckpointParts[cCount] = n
 		Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurChar.Velocity }
 	elseif keyEvent == "GoToLastCheck" then
-		local data = Checkpoints[cCount] and Checkpoints[cCount].Pivot or spawnCFrame
+		local data = Checkpoints[cCount] or{ Pivot = spawnLocation.CFrame, Velocity = Vector3.zero
+}
 
 		if not data then
 			return
 		end
 
-		CurChar:PivotTo(data.Velocity and data.Pivot or data)
+		CurChar:PivotTo(data.Pivot)
 		CurChar.Velocity = data.Velocity
-or Vector3.new(0,0,0)
 	elseif keyEvent == "RemoveLastCheck" then
 		if not Checkpoints[cCount] then
 			return
@@ -159,8 +159,15 @@ UIS.InputEnded:Connect(function(inp)
 	end
 end)
 
+local ePart = Instance.new("Part", workspace)
+ePart.Transparency = 1
+
+ePart.CanQuery = false
+ePart.CanTouch = false
+
 RunService.Heartbeat:Connect(function(dt)
 	if not noclip then
+        ePart.CanCollide = false
 		return
 	end
 
@@ -168,6 +175,8 @@ RunService.Heartbeat:Connect(function(dt)
 	if not character then
 		return
 	end
+	
+	ePart.CanCollide = true
 
 	local cameraCF = Workspace.CurrentCamera.CFrame
 	local forward = Vector3.new(cameraCF.LookVector.X, 0, cameraCF.LookVector.Z)
@@ -213,4 +222,6 @@ RunService.Heartbeat:Connect(function(dt)
 	targetPosition = final
 	character:PivotTo(final)
     character.Velocity = Vector3.zero
+    
+    ePart.Position = final.Position + Vector3.new(0,-3,0)
 end)
