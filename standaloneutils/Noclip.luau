@@ -2,8 +2,8 @@
 	Noclip Utility (standalone version)
 	by rasen46
 
-	last update: 10/11/2026
-	v1.0.2
+	last update: 11/22/2026
+	v1.0.3
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -89,8 +89,15 @@ UIS.InputEnded:Connect(function(inp)
 	end
 end)
 
+local ePart = Instance.new("Part", workspace)
+ePart.Transparency = 1
+
+ePart.CanQuery = false
+ePart.CanTouch = false
+
 RunService.Heartbeat:Connect(function(dt)
 	if not noclip then
+        ePart.CanCollide = false
 		return
 	end
 
@@ -98,6 +105,8 @@ RunService.Heartbeat:Connect(function(dt)
 	if not character then
 		return
 	end
+	
+	ePart.CanCollide = true
 
 	local cameraCF = Workspace.CurrentCamera.CFrame
 	local forward = Vector3.new(cameraCF.LookVector.X, 0, cameraCF.LookVector.Z)
@@ -143,4 +152,6 @@ RunService.Heartbeat:Connect(function(dt)
 	targetPosition = final
 	character:PivotTo(final)
 	character.Velocity = Vector3.zero
+	
+	ePart.Position = final.Position + Vector3.new(0,-3,0)
 end)
