@@ -2,8 +2,8 @@
 	Alljump Utility (standalone version)
 	by rasen46
 
-	last update: 10/11/2026
-	v1.0.2
+	last update: 11/22/2026
+	v1.0.3
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -60,7 +60,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 			cCount += 1
 
 			local n = createAJPart()
-			n.CFrame = Configuration.AJ.CentertoHRP and (charPivot + CFrame.new(0, 2.5, 0)) or charPivot
+			n.CFrame = if Configuration.AJ.CentertoHRP then charPivot else (charPivot + Vector3.new(0, 2.5, 0))
 
 			CheckpointParts[cCount] = n
 			Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurCharacter.Velocity }
