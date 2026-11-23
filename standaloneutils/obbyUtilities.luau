@@ -2,8 +2,8 @@
 	Obby Utilities (standalone version)
 	by rasen46
 
-	last update: 11/22/2026
-	v1.0.6
+	last update: 11/23/2026
+	v1.0.7 
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -12,7 +12,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
-local character = player.Character
+local character = player.Character or player.CharacterAdded:Wait()
 local camera = Workspace.CurrentCamera
 
 local Configuration = {
@@ -42,7 +42,7 @@ local Configuration = {
 	NC = {
 		NoclipSpeedDefault = 50,
 		NoclipSpeedIncrement = 5,
-	}
+	},
 }
 
 local keys = {
@@ -92,7 +92,8 @@ UIS.InputBegan:Connect(function(inp, pro)
 	local key = inp.KeyCode.Name
 	local keyEvent = Configuration.KEYBINDS[inp.KeyCode]
 	local CurChar = player.Character
-	local charPivot = CurChar:GetPivot()
+	local HRP = CurChar:FindFirstChild("HumanoidRootPart")
+	local HRPCFrame = HRP.CFrame
 
 	if keys[key] ~= nil then
 		keys[key] = true
@@ -101,7 +102,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 	if keyEvent == "Noclip" then
 		noclip = not noclip
 		if noclip then
-			targetPosition = player.Character:GetPivot()
+			targetPosition = HRP.CFrame
 		end
 	elseif keyEvent == "NoclipUp" then
 		keys.up = true
@@ -111,20 +112,25 @@ UIS.InputBegan:Connect(function(inp, pro)
 		cCount += 1
 
 		local n = createAJPart()
-		n.CFrame = if Configuration.AJ.CentertoHRP then charPivot else (charPivot + Vector3.new(0, 2.5, 0))
+		n.CFrame = if Configuration.AJ.CentertoHRP then HRPCFrame else (HRPCFrame + Vector3.new(0, 2.5, 0))
 
 		CheckpointParts[cCount] = n
-		Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurChar.Velocity }
+		Checkpoints[cCount] = { Pivot = HRPCFrame, Velocity = HRP.AssemblyLinearVelocity }
 	elseif keyEvent == "GoToLastCheck" then
-		local data = Checkpoints[cCount] or{ Pivot = spawnLocation.CFrame, Velocity = Vector3.zero
-}
+		local data = Checkpoints[cCount]
+			or {
+				Pivot = spawnLocation.CFrame
+					+ Vector3.new(0, 2.5, 0)
+					+ Vector3.new(0, (if spawnLocation.Size then spawnLocation.Size.Y else 0), 0),
+				Velocity = Vector3.zero,
+			}
 
 		if not data then
 			return
 		end
 
-		CurChar:PivotTo(data.Pivot)
-		CurChar.Velocity = data.Velocity
+		HRP.CFrame = data.Pivot
+		HRP.AssemblyLinearVelocity = data.Velocity
 	elseif keyEvent == "RemoveLastCheck" then
 		if not Checkpoints[cCount] then
 			return
@@ -143,7 +149,7 @@ UIS.InputBegan:Connect(function(inp, pro)
 		speed = Configuration.NC.NoclipSpeedDefault
 	end
 
-	speed = math.max(0,speed)
+	speed = math.max(0, speed)
 end)
 
 UIS.InputEnded:Connect(function(inp)
@@ -159,15 +165,8 @@ UIS.InputEnded:Connect(function(inp)
 	end
 end)
 
-local ePart = Instance.new("Part", workspace)
-ePart.Transparency = 1
-
-ePart.CanQuery = false
-ePart.CanTouch = false
-
 RunService.Heartbeat:Connect(function(dt)
 	if not noclip then
-        ePart.CanCollide = false
 		return
 	end
 
@@ -175,8 +174,6 @@ RunService.Heartbeat:Connect(function(dt)
 	if not character then
 		return
 	end
-	
-	ePart.CanCollide = true
 
 	local cameraCF = Workspace.CurrentCamera.CFrame
 	local forward = Vector3.new(cameraCF.LookVector.X, 0, cameraCF.LookVector.Z)
@@ -190,19 +187,9 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 
 	local direction = Vector3.zero
+	local mDir = character.Humanoid.MoveDirection
 
-	if keys.W then
-		direction += forward
-	end
-	if keys.S then
-		direction -= forward
-	end
-	if keys.D then
-		direction += right
-	end
-	if keys.A then
-		direction -= right
-	end
+	direction += Vector3.new(mDir.X, 0, mDir.Z)
 
 	if keys.up then
 		direction += Vector3.yAxis
@@ -220,8 +207,6 @@ RunService.Heartbeat:Connect(function(dt)
 	local final = CFrame.lookAt(newPosition, newPosition + forward)
 
 	targetPosition = final
-	character:PivotTo(final)
-    character.Velocity = Vector3.zero
-    
-    ePart.Position = final.Position + Vector3.new(0,-3,0)
+	character.HumanoidRootPart.CFrame = final
+	character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, -1, 0)
 end)
