@@ -2,8 +2,8 @@
 	Alljump Utility (standalone version)
 	by rasen46
 
-	last update: 11/22/2026
-	v1.0.3
+	last update: 11/23/2026
+	v1.0.4
 ]]
 
 local UIS = game:GetService("UserInputService")
@@ -52,28 +52,34 @@ UIS.InputBegan:Connect(function(inp, pro)
 	end
 
 	local keyEvent = Configuration.KEYBINDS[inp.KeyCode]
-	local CurCharacter = player.Character or player.CharacterAdded:Wait()
-	local charPivot = CurCharacter:GetPivot()
+	local CurCharacter = player.Character
+	local HRP = CurCharacter:FindFirstChild("HumanoidRootPart")
+	local HRPCFrame = HRP.CFrame
 
 	if keyEvent then
 		if keyEvent == "SetCheckpoint" then
 			cCount += 1
 
 			local n = createAJPart()
-			n.CFrame = if Configuration.AJ.CentertoHRP then charPivot else (charPivot + Vector3.new(0, 2.5, 0))
+			n.CFrame = if Configuration.AJ.CentertoHRP then HRPCFrame else (HRPCFrame + Vector3.new(0, 2.5, 0))
 
 			CheckpointParts[cCount] = n
-			Checkpoints[cCount] = { Pivot = charPivot, Velocity = CurCharacter.Velocity }
+			Checkpoints[cCount] = { Pivot = HRPCFrame, Velocity = HRP.AssemblyLinearVelocity }
 		elseif keyEvent == "GoToLastCheck" then
-			local data = Checkpoints[cCount] or{ Pivot = spawnLocation.CFrame, Velocity = Vector3.zero
-}
+			local data = Checkpoints[cCount]
+				or {
+					Pivot = spawnLocation.CFrame
+						+ Vector3.new(0, 2.5, 0)
+						+ Vector3.new(0, (if spawnLocation.Size then spawnLocation.Size.Y else 0), 0),
+					Velocity = Vector3.zero,
+				}
 
 			if not data then
 				return
 			end
 
-			CurCharacter:PivotTo(data.Pivot)
-			CurCharacter.Velocity = data.Velocity
+			HRP.CFrame = data.Pivot
+			HRP.AssemblyLinearVelocity = data.Velocity
 		elseif keyEvent == "RemoveLastCheck" then
 			if not Checkpoints[cCount] then
 				return
